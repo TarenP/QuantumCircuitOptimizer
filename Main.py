@@ -131,7 +131,7 @@ def checker(qc, size):
 
 
 
-def Main(qc):
+def QCoptimize(qc):
     keyDF = KeytoDF()
     print(keyDF)
     qcDF = QCtoDF(qc)
