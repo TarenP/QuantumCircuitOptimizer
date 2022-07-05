@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import codecs
 import os
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
 DESCRIPTION = 'A package for quantum circuit optimization'
 LONG_DESCRIPTION = 'A package that modifies an existing quantum circuit, built with qiskit, to reduce the amount of gates, computing time, and error rates'
 
@@ -19,7 +19,7 @@ setup(
     install_requires=['numpy', 'pandas', 'qiskit', 'csv'],
     keywords=['python', 'quantum', 'quantum computing', 'qiskit', 'quantum circuit', 'optimization'],
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "Programming Language :: Python :: 3",
         "Operating System :: Unix",

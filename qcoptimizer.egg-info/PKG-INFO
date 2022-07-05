@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: qcoptimizer
-Version: 0.0.1
+Version: 0.0.2
 Summary: A package for quantum circuit optimization
 Home-page: UNKNOWN
 Author: Taren Patel
@@ -8,7 +8,7 @@ Author-email: <Tarenpatel1013@gmail.com>
 License: UNKNOWN
 Keywords: python,quantum,quantum computing,qiskit,quantum circuit,optimization
 Platform: UNKNOWN
-Classifier: Development Status :: 1 - Planning
+Classifier: Development Status :: 3 - Alpha
 Classifier: Intended Audience :: Developers
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: Unix
