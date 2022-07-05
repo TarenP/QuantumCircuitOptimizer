@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[23]:
-
 
 from qiskit import *
 import numpy as np
@@ -11,11 +6,6 @@ from qiskit.visualization import plot_bloch_multivector, plot_histogram, array_t
 import csv
 sim = Aer.get_backend('qasm_simulator')
 typeOfGates = ['x', 'y', 'z', 'h']
-
-
-# ## Circuit to DF
-
-# In[24]:
 
 
 def QCtoDF(qc):
@@ -40,11 +30,6 @@ def QCtoDF(qc):
             writer.writerow(temp)
     df = pd.DataFrame(pd.read_csv(r"Synonym_Database\gates.csv"))
     return df
-
-
-# ## Key to DF
-
-# In[25]:
 
 
 #Clean up the data in csv to fit conventional list look
@@ -75,9 +60,6 @@ def KeytoDF():
     return df
 
 
-# In[26]:
-
-
 #generate a list of the gates on a given qubit
 def GateList(qubitNum, qcDF):
     lst = []
@@ -96,9 +78,6 @@ def GateList(qubitNum, qcDF):
             if int(temp) == qubitNum:
                 lst.append(qcDF['Gate'][i])
     return lst
-
-
-# In[27]:
 
 
 def Optimize(qcDF, keyDF, qubitGates, typeOfGates):
@@ -144,19 +123,12 @@ def Optimize(qcDF, keyDF, qubitGates, typeOfGates):
     
 
 
-# In[28]:
-
-
 def checker(qc, size):
     qc.measure(size-1, size-1)
     result = execute(qc, backend=sim, shots = 1024).result()
     #plot_histogram(counts)
     return result.time_taken
 
-
-# ## Synonym Algorithm
-
-# In[29]:
 
 
 def Main(qc):
@@ -182,5 +154,3 @@ def Main(qc):
     
     return qc1
         
-    
-
