@@ -10,7 +10,6 @@ typeOfGates = ['x', 'y', 'z', 'h']
 
 def QCtoDF(qc):
     string = qc.qasm()
-    List = ()
     circuit = string.split(';')
     circuit = circuit[4:]
     circuit.pop(len(circuit)-1)
