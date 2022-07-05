@@ -1,0 +1,10 @@
+LICENSE
+README.md
+setup.py
+qcoptimizer/Main.py
+qcoptimizer/__init__.py
+qcoptimizer.egg-info/PKG-INFO
+qcoptimizer.egg-info/SOURCES.txt
+qcoptimizer.egg-info/dependency_links.txt
+qcoptimizer.egg-info/requires.txt
+qcoptimizer.egg-info/top_level.txt
