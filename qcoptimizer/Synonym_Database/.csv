@@ -1,4 +1,0 @@
-Gate,Qubit
-h,q[0]
-z,q[0]
-z,q[1]

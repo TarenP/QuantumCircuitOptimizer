@@ -1,12 +1,22 @@
+__author__ = "Taren Patel"
+__email__ = "Tarenpatel1013@gmail.com"
+__status__ = "Alpha"
+
 
 from qiskit import *
 import numpy as np
 import pandas as pd
-from qiskit.visualization import plot_bloch_multivector, plot_histogram, array_to_latex
 import csv
+from importlib import resources
+import io
+
 sim = Aer.get_backend('qasm_simulator')
 typeOfGates = ['x', 'y', 'z', 'h']
 
+files = [
+    'gates.csv',
+    'key.csv'
+]
 
 def QCtoDF(qc):
     string = qc.qasm()
@@ -14,7 +24,7 @@ def QCtoDF(qc):
     circuit = circuit[4:]
     circuit.pop(len(circuit)-1)
     #print(circuit)
-    with open(r"Synonym_Database\gates.csv", 'w', newline='', encoding='UTF8') as f:
+    with open(r"gates.csv", 'w', newline='', encoding='UTF8') as f:
         writer = csv.writer(f)
         writer.writerow(['Gate', 'Qubit'])
         for i in range(len(circuit)):
@@ -27,13 +37,15 @@ def QCtoDF(qc):
                  temp[1] = temp[1].replace("q[", '')
                  temp[1] = temp[1].replace("]", '')
             writer.writerow(temp)
-    df = pd.DataFrame(pd.read_csv(r"Synonym_Database\gates.csv"))
+    df = pd.DataFrame(pd.read_csv(r"gates.csv"))
     return df
 
 
 #Clean up the data in csv to fit conventional list look
 def KeytoDF():
-    df = pd.read_csv(r"Synonym_Database\key.csv")
+    url='https://drive.google.com/file/d/1VdJTGwXUYv-ZnJNoF3SAfqzL5FOjWSNS/view?usp=sharing'
+    url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+    df = pd.read_csv(url)
     for r in range(len(df)):
         try:
             df['Replacement'][r] = df['Replacement'][r].replace("('", '')
@@ -79,7 +91,7 @@ def GateList(qubitNum, qcDF):
     return lst
 
 
-def Optimize(qcDF, keyDF, qubitGates, typeOfGates):
+def enhance(qcDF, keyDF, qubitGates, typeOfGates):
     final = []
     for i in qubitGates:
         temp = []
@@ -130,14 +142,14 @@ def checker(qc, size):
 
 
 
-def QCoptimize(qc):
+def optimize(qc):
     keyDF = KeytoDF()
     print(keyDF)
     qcDF = QCtoDF(qc)
     qubitGates = []
     for i in range(len(qc.qubits)):
         qubitGates.append(GateList(i, qcDF))
-    qc1 = Optimize(qcDF, keyDF, qubitGates, typeOfGates)
+    qc1 = enhance(qcDF, keyDF, qubitGates, typeOfGates)
     #print(qc)
     c1 = checker(qc1, len(qc1.qubits))
     c2 = checker(qc, len(qc.qubits))
@@ -152,4 +164,3 @@ def QCoptimize(qc):
         print(c1-c2)
     
     return qc1
-        

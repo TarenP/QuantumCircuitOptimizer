@@ -1,10 +1,13 @@
 LICENSE
+MANIFEST.in
 README.md
-setup.py
-qcoptimizer/Main.py
+pyproject.toml
+setup.cfg
 qcoptimizer/__init__.py
+qcoptimizer/gates.csv
+qcoptimizer/key.csv
+qcoptimizer/qcoptimizer.py
 qcoptimizer.egg-info/PKG-INFO
 qcoptimizer.egg-info/SOURCES.txt
 qcoptimizer.egg-info/dependency_links.txt
-qcoptimizer.egg-info/requires.txt
 qcoptimizer.egg-info/top_level.txt
