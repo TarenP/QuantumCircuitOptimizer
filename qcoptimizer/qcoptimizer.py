@@ -91,7 +91,7 @@ def GateList(qubitNum, qcDF):
     return lst
 
 
-def enhance(qcDF, keyDF, qubitGates, typeOfGates):
+def enhance(keyDF, qubitGates, typeOfGates):
     final = []
     for i in qubitGates:
         temp = []
@@ -144,23 +144,23 @@ def checker(qc, size):
 
 def optimize(qc):
     keyDF = KeytoDF()
-    print(keyDF)
+    #print(keyDF)
     qcDF = QCtoDF(qc)
     qubitGates = []
     for i in range(len(qc.qubits)):
         qubitGates.append(GateList(i, qcDF))
-    qc1 = enhance(qcDF, keyDF, qubitGates, typeOfGates)
+    qc1 = enhance(keyDF, qubitGates, typeOfGates)
     #print(qc)
-    c1 = checker(qc1, len(qc1.qubits))
-    c2 = checker(qc, len(qc.qubits))
-    print(c1)
-    print(c2)
-    if c1 < c2:
-        print("Optimized QC is faster by: ")
-        print(c2-c1)
+    # c1 = checker(qc1, len(qc1.qubits))
+    # c2 = checker(qc, len(qc.qubits))
+    # print(c1)
+    # print(c2)
+    # if c1 < c2:
+    #     print("Optimized QC is faster by: ")
+    #     print(c2-c1)
         
-    else:
-        print("Optimized QC is slower by: ")
-        print(c1-c2)
+    # else:
+    #     print("Optimized QC is slower by: ")
+    #     print(c1-c2)
     
     return qc1
