@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: qcoptimizer
-Version: 0.0.18
+Version: 0.0.19
 Summary: A package for quantum circuit optimization
 Author: Taren Patel
 Author-email: tarenpatel1013@gmail.com
@@ -14,3 +14,5 @@ License-File: LICENSE
 ## QuantumCircuitOptimizer
 
 #### This optimizes circuits created using qiskit to maximize efficiency and performance. It takes the current circuit and provides a better solution which uses less gates and therefore reduces error rates.
+
+#### Github: https://github.com/TarenP/QuantumCircuitOptimizer
