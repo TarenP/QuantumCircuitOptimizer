@@ -7,8 +7,7 @@ from qiskit import *
 import numpy as np
 import pandas as pd
 import csv
-from importlib import resources
-import io
+from itertools import combinations
 
 sim = Aer.get_backend('qasm_simulator')
 typeOfGates = ['x', 'y', 'z', 'h']
@@ -93,22 +92,75 @@ def GateList(qubitNum, qcDF):
 
 def enhance(keyDF, qubitGates, typeOfGates):
     final = []
+    #each qubit
     for i in qubitGates:
         temp = []
         qubit = []
+        #each gate
         for r in i:
             if r in typeOfGates:
                 temp.append(r)
             else:
                 qubit.append(temp)
                 temp = []
-                qubit.append([r])
+                qubit.append(r)
             #if greater than 4 items in list, check which list split will lead to the best compute time and fewest gates
-            if len(temp) >=4:
-                qubit.append(temp)
-                temp = []
         qubit.append(temp)
-        final.append(qubit)
+        print(qubit)
+    
+    #create list of all viable gate combinations that don't change the permutation of the circuit
+    #each set of gates for the qubit
+    for q in qubit:
+        qString = ','.join(q)
+        gateSets = []
+        replacementTimes = []
+        targetTimes = []
+        possibilities = []
+        #each gate in set
+        combo = [com for sub in range(4) for com in combinations(q, sub + 1)]
+        #print(combo)
+        for i in range(len(combo)):
+            combo[i] = list(combo[i])
+            idxString = ','.join(combo[i])
+            if idxString in qString:
+                gateSets.append(combo[i])
+        #print(q)
+        #print(gateSets)
+        #find all replacements that correspond to elements in gateSets
+        for p in range(len(gateSets)):
+            for j in range(len(keyDF)):
+                if keyDF['Target'][j].split(',') == gateSets[p]:
+                    #if they are equal set the gate combo in final list = to replacement synonym
+                    possibilities.append(keyDF['Replacement'][j].split(','))
+        print(possibilities)
+        
+        #find the time it takes to execute each target set of gates
+        for set in gateSets:
+            qc = QuantumCircuit(1, 1) #1 quantum, 1 classical
+            for j in set:
+                getattr(qc , j)(0)
+            qc.measure(0, 0)
+            result = execute(qc, backend=Aer.get_backend('qasm_simulator'), shots = 1024).result()
+            targetTimes.append(result.time_taken)
+        print(targetTimes)
+        
+        #find the time it takes to execute each replacement set of gates
+        for set in possibilities:
+            qc = QuantumCircuit(1, 1) #1 quantum, 1 classical
+            for j in set:
+                getattr(qc , j)(0)
+            qc.measure(0, 0)
+            result = execute(qc, backend=Aer.get_backend('qasm_simulator'), shots = 1024).result()
+            replacementTimes.append(result.time_taken)
+        print(replacementTimes)
+                
+    
+        '''
+        Compare the two times and see which replacements reduce the most amount of time and gates
+        Figure out how to find the optimal balance and split the gates up into sets based on these qualities
+        '''
+    
+        # final.append(qubit)
     
     #qubit
     for n in range(len(final)):
@@ -164,3 +216,13 @@ def optimize(qc):
     #     print(c1-c2)
     
     return qc1
+
+
+qc = QuantumCircuit(1, 1)
+qc.x(0)
+qc.h(0)
+qc.z(0)
+qc.y(0)
+qc.z(0)
+qc.z(0)
+qc1 = optimize(qc)
