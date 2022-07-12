@@ -10,9 +10,10 @@ import csv
 from itertools import combinations
 from collections import OrderedDict
 from scipy.fftpack import diff
+from sympy import timed
 
 sim = Aer.get_backend('qasm_simulator')
-typeOfGates = ['x', 'y', 'z', 'h']
+typeOfGates = ['x', 'y', 'z', 'h', 'i']
 passGates = ['cx']
 
 
@@ -129,7 +130,11 @@ def times(lst):
     for combo in lst:
         qc1 = QuantumCircuit(1, 1) #1 quantum, 1 classical
         for g in combo:
-            getattr(qc1 , g)(0)
+            #check if id gate; add id gate
+            if g != 'i':
+                getattr(qc1 , 'id')(0)
+            else:
+                getattr(qc1 , g)(0)
         qc1.measure(0, 0)
         result = execute(qc1, backend=Aer.get_backend('qasm_simulator'), shots = 1024).result()
         times.append(result.time_taken)
@@ -139,6 +144,7 @@ def times(lst):
 def comboSynonyms(keyDF, combos):
     replacements = []
     targets = []
+    found = False
     for combo in combos:
         combo = list(combo)
         for m in range(len(keyDF)):
@@ -146,11 +152,18 @@ def comboSynonyms(keyDF, combos):
                 #if they are equal set the gate combo in final list = to replacement synonym
                 replacements.append(keyDF['Replacement'][m].split(','))
                 targets.append(keyDF['Target'][m].split(','))
+                found = True
+    #if the replacement is no gate, use id gate for better integration with script
+    if found and replacements == []:
+        replacements.append('i')
+        targets.append(list(combos[0]))
+    elif found == False and replacements == []:
+        replacements.append(list(combos[0]))
+        targets.append(list(combos[0]))
+    
     return targets, replacements
 
 def bestCombo(replacements, replacementTimes, targetTimes):
-    print('replacements')
-    print(replacements)
     #get time difference
     timeDifference = []
     for t in range(len(targetTimes)):
@@ -166,53 +179,41 @@ def bestCombo(replacements, replacementTimes, targetTimes):
     for i in range(len(replacements)):
         if len(replacements[i]) == min(lengths):
             idxs.append(i)
+    #get list of replacements in descending order
+    order = []
+    timeDifference.sort(reverse = True)
+    for i in timeDifference:
+        order.append(replacements[timeDifference.index(i)])
     
-    #get replacement with smallest gate count and biggest time difference between target and replacements
-    if len(idxs) > 0:
-        largest = 0
-        for i in idxs:
-            if largest == 0:
-                largest = timeDifference[i]
-            elif timeDifference[i] > largest:
-                largest = timeDifference[i]
-        print('largest')
-        print(largest)        
-        return replacements[timeDifference.index(largest)], timeDifference.index(largest)
-    else:
-        return None, None
+    print(i)
             
-def shortenedGate(target, gate):
-    qString = ','.join(gate)
-    qString = qString.replace(',', '')
-    print(qString)
-    tString = ','.join(target)
-    tString = tString.replace(',', '')
-    print(tString)
-    idx = qString.index(tString)
-    print(idx)
+    return 'hi'
             
+'''
+Feed best combo list of all combinations for everysingle item in gate
+make sure to avoid cx
+'''
+
+
 def enhance(keyDF, qubitGates, typeOfGates):
     #print(qubitGates)
+    final = []
     for qubit in qubitGates:
         qList = list_split(qubit)
         for gate in qList:
-           if normalGate(gate):
+            if normalGate(gate):
+                print(gate)
                 combos = viableCombos(gate)
+
                 targets, replacements = comboSynonyms(keyDF, combos)
-                # print('targets')
-                # print(targets)
                 # print('replacements')
                 # print(replacements)
                 replacementTimes = times(replacements)
                 targetTimes = times(targets)
                 # print(replacementTimes)
                 # print(targets)
-                best, idx = bestCombo(replacements, replacementTimes, targetTimes)
+                array = bestCombo(replacements, replacementTimes, targetTimes)
                 #if replacement gate is a gate vs a replacement of no gate
-                if idx != None:
-                    print('targets')
-                    print(targets[idx])
-                    shortenedGate(targets[idx], gate)
             
             
     # qc = QuantumCircuit(len(final), len(final))
@@ -279,10 +280,6 @@ qc.y(0)
 qc.y(0)
 qc.x(1)
 qc.cx(1, 0)
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 qc1 = optimize(qc)
 # print(qc)
