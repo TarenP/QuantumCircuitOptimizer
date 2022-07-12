@@ -121,9 +121,8 @@ def enhance(keyDF, qubitGates, typeOfGates):
     # print(final)
     for q in circuit:
         for p in q:
-            qc = p
+            qc = [p]
             qnum = circuit.index(q)
-            qString = ','.join(qc)
             # print('qnum')
             # print(qnum)
             # print('qstring')
@@ -131,30 +130,30 @@ def enhance(keyDF, qubitGates, typeOfGates):
             # print('q')
             # print(p)
             while len(qc) > 0:
+                qString = ','.join(qc[0])
                 gateSets = []
                 replacementTimes = []
                 targetTimes = []
                 replacements = []
                 targets = []
+                pStr = listToString(qc)
                 if 'cx' not in p:
+                    print('qc')
                     print(qc)
+                    print('final')
                     print(final)
                     #each gate in set
-                    combo = [com for sub in range(len(typeOfGates)) for com in combinations(qc, sub + 1)]
+                    combo = [com for sub in range(len(typeOfGates)) for com in combinations(qc[0], sub + 1)]
+                    print('combo')
+                    print(combo)
                     for i in range(len(combo)):
                         combo[i] = list(combo[i])
-                        #print(combo[i])
-                        idxString = ','.join(combo[i][0])
+                        idxString = ','.join(combo[i])
                         if idxString in qString:
                             gateSets.append(combo[i])
                     print("gatesets")
                     print(gateSets)
                     print(len(gateSets))
-                    for gate in gateSets:
-                        # check if the count of sweet is > 1 (repeating item)
-                        if gateSets.count(gate) > 1:
-                            # if True, remove the first occurrence of sweet
-                            gateSets.remove(gate)
                     print(gateSets)
                     print(len(gateSets))
                     #find all replacements that correspond to elements in gateSets
@@ -171,8 +170,9 @@ def enhance(keyDF, qubitGates, typeOfGates):
                             targets.append(gateSets[n])
                             replacements.append(gateSets[n])
 
-                    # print('targs')      
-                    # print(targets)
+                    print('targs')      
+                    print(targets)
+                    print('replacements')
                     print(replacements)
                     if len(replacements) >1:
                         #find the time it takes to execute each target set of gates
@@ -185,8 +185,8 @@ def enhance(keyDF, qubitGates, typeOfGates):
                             result = execute(qc1, backend=Aer.get_backend('qasm_simulator'), shots = 1024).result()
                             targetTimes.append(result.time_taken)
                         # print('target')
-                        print(len(targets))
-                        print(len(targetTimes))
+                        # print(len(targets))
+                        # print(len(targetTimes))
                         
                         #find the time it takes to execute each replacement set of gates
                         for set in replacements:
@@ -196,8 +196,8 @@ def enhance(keyDF, qubitGates, typeOfGates):
                             qc2.measure(0, 0)
                             result = execute(qc2, backend=Aer.get_backend('qasm_simulator'), shots = 1024).result()
                             replacementTimes.append(result.time_taken)
-                        print(len(replacements))
-                        print(len(replacementTimes))
+                        # print(len(replacements))
+                        # print(len(replacementTimes))
                                 
                     
                         '''
@@ -216,15 +216,24 @@ def enhance(keyDF, qubitGates, typeOfGates):
                             lendifference.append(len(targets[i]) - len(replacements[i]))
                         ldIdx = lendifference.index(max(lendifference))
                         
-                        #print(timeDifference)  
+                        pStr = listToString(p)
+                        
+                        
+                        print(timeDifference)  
                         if tdIdx == ldIdx:
                             # print(tdIdx)
                             # print(replacements)
-                            final[qnum].append(replacements[tdIdx])
-                            delStr = str(targets[tdIdx])
+                            targetStr = listToString(targets[tdIdx])
+                            pStr = listToString(p)
+                            idx = pStr.index(targetStr)
+                            print(p)
+                            try:
+                                final[qnum].insert(pStr.index(targetStr), final[qnum].append(replacements[tdIdx]))
+                            except:
+                                final[qnum].append(final[qnum].append(replacements[tdIdx]))
                         else:
                             temp = []
-                            print(max(lendifference))
+                            # print(max(lendifference))
                             for i in range(len(timeDifference)):
                                 if lendifference[i] == max(lendifference):
                                     temp.append(timeDifference[i])
@@ -235,78 +244,157 @@ def enhance(keyDF, qubitGates, typeOfGates):
                             print(timeDifference.index(max(temp)))
                             print("final")
                             print(final)
+                            print('qnum')
                             print(qnum)
-                            final[qnum].append(replacements[timeDifference.index(max(temp))])
+                            print('repplasdasndas')
+                            targetStr = listToString(targets[timeDifference.index(max(temp))])
+                            print(targetStr)
+                            idx = pStr.index(targetStr)
+                            print(idx)
+                            print(qc)
+                            try:
+                                final[qnum].insert(pStr.index(targetStr), replacements[timeDifference.index(max(temp))])
+                            except:
+                                final[qnum].append(replacements[timeDifference.index(max(temp))])
+                            print('targetstr')
+                            print(targetStr)
+                            print('str')
+                            print(pStr)
+                            print("final")
                             print(final)
-                            delStr = str(targets[timeDifference.index(max(temp))])
-                            print(delStr)
+                            print('len')
+                            print(len(targetStr))
                         print(qc)
-                        delStr = delStr.replace(',', '')
-                        print(delStr)
-                        delStr = delStr.replace("[", '')
-                        print(delStr)
-                        delStr = delStr.replace("]", '')
-                        print(delStr)
-                        delStr = delStr.replace("'", '')
-                        print(delStr)
-                        delStr = delStr.replace(" ", '')
-                        print(delStr)
-                        qString = qString.replace(',', '')
-                        print(qString)
-                        qString = qString.replace(delStr, '')
-                        print(qString)
-                        qc = list(qString)
+                        qcTemp = qc
+                        print('qctemp')
+                        print(qcTemp)
+                        qc = []
+                        temp = []
+                        temp2 = []
+                        if len(qcTemp) == 1:
+                            for a in range(len(qcTemp[0])):
+                                print(temp)
+                                if a < idx:
+                                    temp.append(qcTemp[0][a])
+                                elif a > idx + len(targetStr) - 1:
+                                    if len(temp) == 0:
+                                        temp2.append(qcTemp[0][a])
+                                    else:
+                                        qc.append(temp)
+                                        temp = []
+                                        temp2.append(qcTemp[0][a])
+                            qc.append(temp)
+                            qc.append(temp2)
+                        else:
+                            qc.append(qcTemp[1])
+                        print(qc)
+                        lstToPop = []
+                        for i in range(len(qc)):
+                            if len(qc[i]) == 0:
+                                lstToPop.append(i)
+                        lstToPop.sort(reverse=True)
+                        for i in lstToPop:
+                            qc.pop(i)
                         print('qc')
                         print(qc)
                     else:
-                        final[qnum].append(replacements[0])
-                        delStr = str(targets[0])
-                        delStr = delStr.replace(',', '')
-                        delStr = delStr.replace("[", '')
-                        delStr = delStr.replace("]", '')
-                        delStr = delStr.replace("'", '')
-                        delStr = delStr.replace(" ", '')
-                        #print(delStr)
-                        qString = qString.replace(',', '')
-                        qString = qString.replace(delStr, '')
-                        qc = list(qString)
+                        targetStr = listToString(targets)
+                        print('targetStr')
+                        print(targetStr)
+                        idx = pStr.index(targetStr)
+                        print(pStr)
+                        print(idx)
+                        print('targhetsaesdas')
+                        print(targets)
+                        try:
+                            final[qnum].insert(pStr.index(targetStr), replacements[0])
+                        except:
+                            final[qnum].append(replacements)
+                        print('old qc')
+                        print(qc)
+                        qcTemp = qc
+                        qc = []
+                        temp = []
+                        temp2 = []
+                        if len(qcTemp) == 1:
+                            for a in range(len(qcTemp[0])):
+                                print(temp)
+                                if a < idx:
+                                    temp.append(qcTemp[0][a])
+                                elif a > idx + len(targetStr) - 1:
+                                    if len(temp) == 0:
+                                        temp2.append(qcTemp[0][a])
+                                    else:
+                                        qc.append(temp)
+                                        temp = []
+                                        temp2.append(qcTemp[0][a])
+                            qc.append(temp)
+                            qc.append(temp2)
+                        else:
+                            qc.append(qcTemp[1])
+                        print('nmew qc')
+                        print(qc)
+                        lstToPop = []
+                        for i in range(len(qc)):
+                            if len(qc[i]) == 0:
+                                lstToPop.append(i)
+                                print(lstToPop)
+                        lstToPop.sort(reverse=True)
+                        for i in lstToPop:
+                            qc.pop(i)
                         print('qc')
                         print(qc)
+                    print('final')
+                    print(final)
                 else:
+                    print('here')
+                    print('here')
+                    print('here')
+                    print('here')
+                    print('here')
                     print('qc')
                     print(qc)
                     print(qnum)
                     final[qnum].append(p)
+                    print(final)
                     qc = []
+                print(len(qc))
+                print(len(qc))
             
-        print(final)
     
-    #qubit
-    for n in range(len(final)):
-        #gate combinations in qubit
-        for i in range(len(final[n])):
-                #crossreference each target in df with gate combo
-                for j in range(len(keyDF)):
-                    if keyDF['Target'][j].split(',') == final[n][i]:
-                        #if they are equal set the gate combo in final list = to replacement synonym
-                        final[n][i] = keyDF['Replacement'][j].split(',')
 
+    #remove 'none' from list
+    for q in range(len(final)):
+        final[q] = list(filter(None, final[q]))
+        
     #create circuit
+    print('final studd')
+    print(final)
+    print('klsjfnsdnfds')
     print(len(final))
-    qc = QuantumCircuit(len(final), len(final))
+    qcirc = QuantumCircuit(len(final), len(final))
     for qubit in range(len(final)):
-        for g in range(len(final[qubit])):
-            for j in final[qubit][g]:
-                print("final[qubit][g]")
-                print(j)
-                if j in passGates:
-                    getattr(qc , final[qubit][g][2])(int(final[qubit][g][0]), int(final[qubit][g][1]))
-                elif j in typeOfGates:
-                    getattr(qc , j)(qubit)
-    return qc
+        for g in final[qubit]:
+            if len(g) == 3 and g[2] in passGates:
+                print(g)
+                print(g[0])
+                print(g[1])
+                print(g[2])
+                getattr(qcirc, g[2])(int(g[0]), int(g[1]))
+            else:
+                getattr(qcirc , g[0])(qubit)
+    return qcirc
 
     
-
+def listToString(lst):
+    delStr = str(lst)
+    delStr = delStr.replace(',', '')
+    delStr = delStr.replace("[", '')
+    delStr = delStr.replace("]", '')
+    delStr = delStr.replace("'", '')
+    delStr = delStr.replace(" ", '')
+    return delStr
+    
 
 def checker(qc, size):
     qc.measure(size-1, size-1)
@@ -319,14 +407,14 @@ def checker(qc, size):
 def optimize(qc):
     keyDF = KeytoDF()
     #print(keyDF)
-    qcDF = QCtoDF(qc)
     qubitGates = []
-    for i in range(len(qc.qubits)):
-        qubitGates.append(GateList(i, qcDF))
+    qcDF = QCtoDF(qc)
+    for j in range(len(qc.qubits)):
+        qubitGates.append(GateList(j, qcDF))
     qc1 = enhance(keyDF, qubitGates, typeOfGates)
-    #print(qc)
-    # c1 = checker(qc1, len(qc1.qubits))
-    # c2 = checker(qc, len(qc.qubits))
+    # print(qc)
+    # c1 = checker(qc, len(qc1.qubits))
+    # c2 = checker(qc1, len(qc.qubits))
     # print(c1)
     # print(c2)
     # if c1 < c2:
@@ -353,6 +441,9 @@ qc.cx(0, 1)
 qc.x(1)
 qc.x(1)
 qc.cx(1, 0)
+qc.y(0)
+qc.z(0)
+qc.y(0)
 
 qc1 = optimize(qc)
 print(qc)
