@@ -306,7 +306,7 @@ def qubitOrder(rOrder, tOrder, gate):
                     elif tString2[a] == 'y' and len(yList) > 0:
                         yList.pop(0)
                     elif tString2[a] == 'z' and len(zList) > 0:
-                        yList.pop(0)
+                        zList.pop(0)
                     elif tString2[a] == 'h' and len(hList) > 0:
                         hList.pop(0)
             if idx2 == []: 
