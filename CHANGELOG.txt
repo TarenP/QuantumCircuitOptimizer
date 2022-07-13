@@ -4,3 +4,8 @@ Change Log
 0.0.7 (7/5/22)
 --------------
 -working on getting package running
+
+0.1.0 (7/13/22)
+--------------
+-Optimizer works with logic to minimize the amount of gates used
+-Working on Readme file

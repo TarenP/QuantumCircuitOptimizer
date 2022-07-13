@@ -4,7 +4,6 @@ README.md
 pyproject.toml
 setup.cfg
 qcoptimizer/__init__.py
-qcoptimizer/gates.csv
 qcoptimizer/key.csv
 qcoptimizer/qcoptimizer.py
 qcoptimizer.egg-info/PKG-INFO
