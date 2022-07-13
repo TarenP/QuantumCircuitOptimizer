@@ -168,6 +168,18 @@ def comboSynonyms(keyDF, combos):
     
     return targets, replacements
 
+def sortListIdxsRev(lst):
+    #https://www.geeksforgeeks.org/python-returning-index-of-a-sorted-list/
+    li=[]
+    for i in range(len(lst)):
+        li.append([lst[i],i])
+    li.sort(reverse = True)
+    sort_index = []
+    
+    for x in li:
+        sort_index.append(x[1])
+    return sort_index
+
 def bestCombo(replacements, targets, replacementTimes, targetTimes):
     #get time difference
     #print(replacements)
@@ -175,60 +187,73 @@ def bestCombo(replacements, targets, replacementTimes, targetTimes):
     for t in range(len(targetTimes)):
         timeDifference.append(targetTimes[t] - replacementTimes[t])
 
-    #get the lengths of each element in replacements list
-    lengths = []
+    #get the lengths of each element in replacements and targets list
+    
+    rlengths = []
     for i in replacements:
-        lengths.append(len(i))
+        if i[0] == 'i':
+            rlengths.append(0)
+        else:
+            rlengths.append(len(i)) 
         
-    #acquire index of replacements with smallest gate count
-    idxs = []
-    for i in range(len(replacements)):
-        if len(replacements[i]) == min(lengths):
-            idxs.append(i)
-    #get list of replacements in descending order
+    tlengths = []
+    for i in targets:
+        tlengths.append(len(i))    
+        
+    lenDifference = []
+    for l in range(len(rlengths)):
+        lenDifference.append(tlengths[l] - rlengths[l])
+        
+    #Sort a list in python and then return the index of elements in sorted order
+    lenSortIdx = sortListIdxsRev(lenDifference)
+    #print(lenSortIdx)
+    lenDifference.sort(reverse = True)
+    
+    sortedTDifference = []
+    for i in lenSortIdx:
+        sortedTDifference.append(timeDifference[i])
+
     rOrder = []
     tOrder = []
-    timeDifference.sort(reverse = True)
-    #print(timeDifference)
-    for i in timeDifference:
+    for i in sortedTDifference:
         rOrder.append(replacements[timeDifference.index(i)])
         tOrder.append(targets[timeDifference.index(i)])
-    #print(tOrder)
-            
+    
+    
+    # print(rOrder)
+    # print(tOrder)
     return rOrder, tOrder
             
-'''
-Feed best combo list of all combinations for everysingle item in gate
-make sure to avoid cx
-'''
 def qubitOrder(rOrder, tOrder, gate):
     qString = ','.join(gate)
     qString = qString.replace(',', '')
-    print(qString)
+    # print(qString)
     
-    print(tOrder)
-    print(rOrder)
+    # print(tOrder)
+    # print(rOrder)
     
 
     qubit = []
     alrAdded = []
     highest = []
     lowest = []
+    xList = list_duplicates_of(qString, 'x')
+    yList = list_duplicates_of(qString, 'y')
+    hList = list_duplicates_of(qString, 'h')
+    zList = list_duplicates_of(qString, 'z')
+    
+    refxList = list_duplicates_of(qString, 'x')
+    refyList = list_duplicates_of(qString, 'y')
+    refhList = list_duplicates_of(qString, 'h')
+    refzList = list_duplicates_of(qString, 'z')
     for i in range(len(rOrder)):
         # print('tOrder')
         # print(tOrder)
         # print('rOrder')
         # print(rOrder)
         # print(qString)
-        xList = list_duplicates_of(qString, 'x')
-        yList = list_duplicates_of(qString, 'y')
-        hList = list_duplicates_of(qString, 'h')
-        zList = list_duplicates_of(qString, 'z')
-        
-        refxList = list_duplicates_of(qString, 'x')
-        refyList = list_duplicates_of(qString, 'y')
-        refhList = list_duplicates_of(qString, 'h')
-        refzList = list_duplicates_of(qString, 'z')
+        # print('hlist')
+        # print(hList)
         if i != 0:
             idx1 = []
             tString1 = ','.join(tOrder[i-1])
@@ -243,7 +268,7 @@ def qubitOrder(rOrder, tOrder, gate):
                         refyList.pop(0)
                     elif tString1[a] == 'z' and len(refzList) > 0:
                         idx1 = refzList[0]
-                        refyList.pop(0)
+                        refzList.pop(0)
                     elif tString1[a] == 'h' and len(refhList) > 0:
                         idx1 = refhList[0]
                         refhList.pop(0)
@@ -253,7 +278,7 @@ def qubitOrder(rOrder, tOrder, gate):
                     elif tString1[a] == 'y' and len(refyList) > 0:
                         refyList.pop(0)
                     elif tString1[a] == 'z' and len(refzList) > 0:
-                        refyList.pop(0)
+                        refzList.pop(0)
                     elif tString1[a] == 'h' and len(refhList) > 0:
                         refhList.pop(0)
             if idx1 == []: 
@@ -271,7 +296,7 @@ def qubitOrder(rOrder, tOrder, gate):
                         yList.pop(0)
                     elif tString2[a] == 'z' and len(zList) > 0:
                         idx2 = zList[0]
-                        yList.pop(0)
+                        zList.pop(0)
                     elif tString2[a] == 'h' and len(hList) > 0:
                         idx2 = hList[0]
                         hList.pop(0)
@@ -293,16 +318,13 @@ def qubitOrder(rOrder, tOrder, gate):
                     if l in p:
                         skip = True
                         break
-            #print(alrAdded)
             if skip == False:
-                print(tString1)
-                print(idx1)
-                print(tString2)
-                print(idx2)
+                # print(tString1)
+                # print(idx1)
+                # print(tString2)
+                # print(idx2)
                 if idx2 + len(tString2) - 1 < idx1:
                     for j in range(len(lowest)):
-                        print(tOrder[i])
-                        print(rOrder[i])
                         if j != 0:
                             if idx2 + len(tString2) - 1 < lowest[j] and  idx2 > lowest[j - 1]:
                                 qubit = insertList(qubit, j, rOrder[i])
@@ -315,20 +337,17 @@ def qubitOrder(rOrder, tOrder, gate):
                                 highest.insert(j + 1, length[-1])
                                 lowest.insert(j + 1, length[0])
                         else:
-                            if idx2 + len(tString2) - 1 <= lowest[j]:               
-                                qubit = insertList(qubit, j, rOrder[i])
-                                alrAdded.insert(j, length)
-                                highest.insert(j, length[-1])
-                                lowest.insert(j, length[0])
-                            elif idx2 > lowest[j]:
-                                qubit = insertList(qubit, j + 1, rOrder[i])
-                                alrAdded.insert(j + 1, length)
-                                highest.insert(j + 1, length[-1])
-                                lowest.insert(j + 1, length[0])
+                            if idx2 + len(tString2) - 1 <= lowest[0]:               
+                                qubit = insertList(qubit, 0, rOrder[i])
+                                alrAdded.insert(0, length)
+                                highest.insert(0, length[-1])
+                                lowest.insert(0, length[0])
+                            elif idx2 > highest[-1]:
+                                qubit = insertList(qubit, highest.index(highest[-1]) + 1, rOrder[i])
+                                alrAdded.insert(highest.index(highest[-1]) + 1, length)
+                                highest.insert(highest.index(highest[-1]) + 1, length[-1])
+                                lowest.insert(highest.index(highest[-1]) + 1, length[0])
                 elif idx2 > idx1 + len(tString1) - 1:
-                    print(tOrder[i])
-                    print('uisahdfui')
-                    print(rOrder[i])
                     for j in range(len(lowest)):
                         if j != 0:
                             if idx2 + len(tString2) - 1 < lowest[j] and  idx2 > lowest[j - 1]:
@@ -342,25 +361,21 @@ def qubitOrder(rOrder, tOrder, gate):
                                 highest.insert(j + 1, length[-1])
                                 lowest.insert(j + 1, length[0])
                         else:
-                            if idx2 + len(tString2) - 1 <= lowest[j]:               
-                                ubit = insertList(qubit, j, rOrder[i])
-                                alrAdded.insert(j, length)
-                                highest.insert(j, length[-1])
-                                lowest.insert(j, length[0])
-                            elif idx2 > lowest[j]:
-                                print(rOrder[i])
-                                qubit = insertList(qubit, j + 1, rOrder[i])
-                                alrAdded.insert(j + 1, length)
-                                highest.insert(j + 1, length[-1])
-                                lowest.insert(j + 1, length[0])
-            
-                    
-            
+                            if idx2 + len(tString2) - 1 <= lowest[0]:               
+                                qubit = insertList(qubit, 0, rOrder[i])
+                                alrAdded.insert(0, length)
+                                highest.insert(0, length[-1])
+                                lowest.insert(0, length[0])
+                            elif idx2 > highest[-1]:
+                                qubit = insertList(qubit, highest.index(highest[-1]) + 1, rOrder[i])
+                                alrAdded.insert(highest.index(highest[-1]) + 1, length)
+                                highest.insert(highest.index(highest[-1]) + 1, length[-1])
+                                lowest.insert(highest.index(highest[-1]) + 1, length[0]) 
         else:
             idx1 = []
             tString1 = ','.join(tOrder[i])
             tString1 = tString1.replace(',', '')
-            print(tString1)
+            # print(tString1)
             for a in range(len(tString1)):
                 if a == 0:
                     if tString1[a] == 'x' and len(xList) > 0:
@@ -371,7 +386,7 @@ def qubitOrder(rOrder, tOrder, gate):
                         yList.pop(0)
                     elif tString1[a] == 'z' and len(zList) > 0:
                         idx1 = zList[0]
-                        yList.pop(0)
+                        zList.pop(0)
                     elif tString1[a] == 'h' and len(hList) > 0:
                         idx1 = hList[0]
                         hList.pop(0)
@@ -381,7 +396,7 @@ def qubitOrder(rOrder, tOrder, gate):
                     elif tString1[a] == 'y' and len(yList) > 0:
                         yList.pop(0)
                     elif tString1[a] == 'z' and len(zList) > 0:
-                        yList.pop(0)
+                        zList.pop(0)
                     elif tString1[a] == 'h' and len(hList) > 0:
                         hList.pop(0)
             if idx1 == []: 
@@ -391,11 +406,15 @@ def qubitOrder(rOrder, tOrder, gate):
             highest.append(lst[-1])
             lowest.append(lst[0])
             qubit = insertList(qubit, 0, rOrder[i])
-    #         print(alrAdded)
-    #         print(highest)
-    #         print(lowest)
-        print('qubit')
-        print(qubit)
+        # print('alradded')
+        # print(alrAdded)
+        # print('high/low')
+        # print(highest)
+        # print(lowest)
+        # print('qubit')
+        # print(qubit)
+    
+    return qubit
 
 def insertList(qubit, pos, lst):
     for i in range(len(lst)):
@@ -416,11 +435,19 @@ def list_duplicates_of(seq,item):
             start_at = loc
     return locs
 
-def enhance(keyDF, qubitGates, typeOfGates):
+def qcAppendNormal(qc, sequence, qubit):
+    for g in sequence:
+        if g != 'i':
+            getattr(qc, g)(qubit)
+
+def qcAppendIrregular(qc, sequence):
+        getattr(qc, sequence[2])(int(sequence[0]), int(sequence[1]))
+
+def enhance(keyDF, qubitGates):
     #print(qubitGates)
-    final = []
-    for qubit in qubitGates:
-        qList = list_split(qubit)
+    qc = QuantumCircuit(len(qubitGates), len(qubitGates))
+    for qubit in range(len(qubitGates)):
+        qList = list_split(qubitGates[qubit])
         for gate in qList:
             if normalGate(gate):
                 combos = viableCombos(gate)
@@ -434,21 +461,12 @@ def enhance(keyDF, qubitGates, typeOfGates):
                 # print(replacementTimes)
                 # print(targets)
                 rOrder, tOrder = bestCombo(replacements, targets, replacementTimes, targetTimes)
-                qubitOrder(rOrder, tOrder, gate)
-            
-            
-    # qc = QuantumCircuit(len(final), len(final))
-    # for qubit in range(len(final)):
-    #     for g in final[qubit]:
-    #         if len(g) == 3 and g[2] in passGates:
-    #             print(g)
-    #             print(g[0])
-    #             print(g[1])
-    #             print(g[2])
-    #             getattr(qc, g[2])(int(g[0]), int(g[1]))
-    #         else:
-    #             getattr(qc , g[0])(qubit)
-    # return qc
+                sequence = qubitOrder(rOrder, tOrder, gate)
+                qcAppendNormal(qc, sequence, qubit)
+            else:
+                qcAppendIrregular(qc, gate)
+      
+    return qc
 
     
 
@@ -468,8 +486,7 @@ def optimize(qc):
     qubitGates = []
     for i in range(len(qc.qubits)):
         qubitGates.append(GateList(i, qcDF))
-    qc1 = enhance(keyDF, qubitGates, typeOfGates)
-    #print(qc)
+    qc1 = enhance(keyDF, qubitGates)
     # c1 = checker(qc1, len(qc1.qubits))
     # c2 = checker(qc, len(qc.qubits))
     # print(c1)
@@ -483,39 +500,3 @@ def optimize(qc):
     #     print(c1-c2)
     
     return qc1
-
-
-qc = QuantumCircuit(2, 2)
-qc.z(0)
-qc.y(0)
-qc.h(0)
-qc.h(0)
-qc.x(0)
-qc.y(0)
-qc.y(0)
-qc.x(1)
-qc.h(1)
-qc.h(1)
-qc.cx(1, 0)
-
-qc1 = QuantumCircuit(2, 2)
-qc1.h(0)
-qc1.y(0)
-qc1.x(1)
-qc1.h(1)
-qc1.cx(1, 0)
-
-qc1 = optimize(qc)
-print(qc)
-
-# from qiskit.visualization import plot_bloch_multivector, plot_histogram, array_to_latex
-# sim = Aer.get_backend('qasm_simulator')
-# qc.measure(1, 1)
-# result = execute(qc, backend=sim, shots = 1024).result()
-# results = result.get_counts()
-# print(results)
-# print(qc1)
-# qc1.measure(1, 1)
-# result = execute(qc1, backend=sim, shots = 1024).result()
-# results = result.get_counts()
-# print(results)
