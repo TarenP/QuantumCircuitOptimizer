@@ -3,6 +3,8 @@ __email__ = "Tarenpatel1013@gmail.com"
 __status__ = "Alpha"
 
 
+from dataclasses import replace
+from xml.dom.minidom import ReadOnlySequentialNamedNodeMap
 from qiskit import *
 import numpy as np
 import pandas as pd
@@ -45,6 +47,7 @@ def KeytoDF():
     url='https://drive.google.com/file/d/1VdJTGwXUYv-ZnJNoF3SAfqzL5FOjWSNS/view?usp=sharing'
     url='https://drive.google.com/uc?id=' + url.split('/')[-2]
     df = pd.read_csv(url)
+    df = df.fillna('i')
     for r in range(len(df)):
         try:
             df['Replacement'][r] = df['Replacement'][r].replace("('", '')
@@ -144,27 +147,30 @@ def times(lst):
 def comboSynonyms(keyDF, combos):
     replacements = []
     targets = []
-    found = False
     for combo in combos:
+        found = False
         combo = list(combo)
         for m in range(len(keyDF)):
             if combo == keyDF['Target'][m].split(','):
                 #if they are equal set the gate combo in final list = to replacement synonym
+
+                
                 replacements.append(keyDF['Replacement'][m].split(','))
                 targets.append(keyDF['Target'][m].split(','))
+                # print('replacements')
+                # print(replacements)
+                # print('targets')
+                # print(targets)
                 found = True
-    #if the replacement is no gate, use id gate for better integration with script
-    if found and replacements == []:
-        replacements.append('i')
-        targets.append(list(combos[0]))
-    elif found == False and replacements == []:
-        replacements.append(list(combos[0]))
-        targets.append(list(combos[0]))
+        if found == False:
+            replacements.append(combo)
+            targets.append(combo)
     
     return targets, replacements
 
-def bestCombo(replacements, replacementTimes, targetTimes):
+def bestCombo(replacements, targets, replacementTimes, targetTimes):
     #get time difference
+    #print(replacements)
     timeDifference = []
     for t in range(len(targetTimes)):
         timeDifference.append(targetTimes[t] - replacementTimes[t])
@@ -180,20 +186,235 @@ def bestCombo(replacements, replacementTimes, targetTimes):
         if len(replacements[i]) == min(lengths):
             idxs.append(i)
     #get list of replacements in descending order
-    order = []
+    rOrder = []
+    tOrder = []
     timeDifference.sort(reverse = True)
+    #print(timeDifference)
     for i in timeDifference:
-        order.append(replacements[timeDifference.index(i)])
-    
-    print(i)
+        rOrder.append(replacements[timeDifference.index(i)])
+        tOrder.append(targets[timeDifference.index(i)])
+    #print(tOrder)
             
-    return 'hi'
+    return rOrder, tOrder
             
 '''
 Feed best combo list of all combinations for everysingle item in gate
 make sure to avoid cx
 '''
+def qubitOrder(rOrder, tOrder, gate):
+    qString = ','.join(gate)
+    qString = qString.replace(',', '')
+    print(qString)
+    
+    print(tOrder)
+    print(rOrder)
+    
 
+    qubit = []
+    alrAdded = []
+    highest = []
+    lowest = []
+    for i in range(len(rOrder)):
+        # print('tOrder')
+        # print(tOrder)
+        # print('rOrder')
+        # print(rOrder)
+        # print(qString)
+        xList = list_duplicates_of(qString, 'x')
+        yList = list_duplicates_of(qString, 'y')
+        hList = list_duplicates_of(qString, 'h')
+        zList = list_duplicates_of(qString, 'z')
+        
+        refxList = list_duplicates_of(qString, 'x')
+        refyList = list_duplicates_of(qString, 'y')
+        refhList = list_duplicates_of(qString, 'h')
+        refzList = list_duplicates_of(qString, 'z')
+        if i != 0:
+            idx1 = []
+            tString1 = ','.join(tOrder[i-1])
+            tString1 = tString1.replace(',', '')
+            for a in range(len(tString1)):
+                if a == 0:
+                    if tString1[a] == 'x' and len(refxList) > 0:
+                        idx1 = refxList[0]
+                        refxList.pop(0)
+                    elif tString1[a] == 'y' and len(refyList) > 0:
+                        idx1 = refyList[0]
+                        refyList.pop(0)
+                    elif tString1[a] == 'z' and len(refzList) > 0:
+                        idx1 = refzList[0]
+                        refyList.pop(0)
+                    elif tString1[a] == 'h' and len(refhList) > 0:
+                        idx1 = refhList[0]
+                        refhList.pop(0)
+                else:
+                    if tString1[a] == 'x' and len(refxList) > 0:
+                        refxList.pop(0)
+                    elif tString1[a] == 'y' and len(refyList) > 0:
+                        refyList.pop(0)
+                    elif tString1[a] == 'z' and len(refzList) > 0:
+                        refyList.pop(0)
+                    elif tString1[a] == 'h' and len(refhList) > 0:
+                        refhList.pop(0)
+            if idx1 == []: 
+                idx1 = qString.index(tString1)
+            tString2 = ','.join(tOrder[i])
+            tString2 = tString2.replace(',', '')
+            idx2 = []
+            for a in range(len(tString2)):
+                if a == 0:
+                    if tString2[a] == 'x' and len(xList) > 0:
+                        idx2 = xList[0]
+                        xList.pop(0)
+                    elif tString2[a] == 'y' and len(yList) > 0:
+                        idx2 = yList[0]
+                        yList.pop(0)
+                    elif tString2[a] == 'z' and len(zList) > 0:
+                        idx2 = zList[0]
+                        yList.pop(0)
+                    elif tString2[a] == 'h' and len(hList) > 0:
+                        idx2 = hList[0]
+                        hList.pop(0)
+                else:
+                    if tString2[a] == 'x' and len(xList) > 0:
+                        xList.pop(0)
+                    elif tString2[a] == 'y' and len(yList) > 0:
+                        yList.pop(0)
+                    elif tString2[a] == 'z' and len(zList) > 0:
+                        yList.pop(0)
+                    elif tString2[a] == 'h' and len(hList) > 0:
+                        hList.pop(0)
+            if idx2 == []: 
+                idx2 = qString.index(tString2)
+            length = list(range(idx2, idx2 + len(tString2)))
+            skip = False
+            for l in length:
+                for p in alrAdded:
+                    if l in p:
+                        skip = True
+                        break
+            #print(alrAdded)
+            if skip == False:
+                print(tString1)
+                print(idx1)
+                print(tString2)
+                print(idx2)
+                if idx2 + len(tString2) - 1 < idx1:
+                    for j in range(len(lowest)):
+                        print(tOrder[i])
+                        print(rOrder[i])
+                        if j != 0:
+                            if idx2 + len(tString2) - 1 < lowest[j] and  idx2 > lowest[j - 1]:
+                                qubit = insertList(qubit, j, rOrder[i])
+                                alrAdded.insert(j, length)
+                                highest.insert(j, length[-1])
+                                lowest.insert(j, length[0])
+                            elif idx2 > highest[j] and  idx2 + len(tString2) - 1 < lowest[j + 1]:
+                                qubit = insertList(qubit, j + 1, rOrder[i])
+                                alrAdded.insert(j + 1, length)
+                                highest.insert(j + 1, length[-1])
+                                lowest.insert(j + 1, length[0])
+                        else:
+                            if idx2 + len(tString2) - 1 <= lowest[j]:               
+                                qubit = insertList(qubit, j, rOrder[i])
+                                alrAdded.insert(j, length)
+                                highest.insert(j, length[-1])
+                                lowest.insert(j, length[0])
+                            elif idx2 > lowest[j]:
+                                qubit = insertList(qubit, j + 1, rOrder[i])
+                                alrAdded.insert(j + 1, length)
+                                highest.insert(j + 1, length[-1])
+                                lowest.insert(j + 1, length[0])
+                elif idx2 > idx1 + len(tString1) - 1:
+                    print(tOrder[i])
+                    print('uisahdfui')
+                    print(rOrder[i])
+                    for j in range(len(lowest)):
+                        if j != 0:
+                            if idx2 + len(tString2) - 1 < lowest[j] and  idx2 > lowest[j - 1]:
+                                qubit = insertList(qubit, j, rOrder[i])
+                                alrAdded.insert(j, length)
+                                highest.insert(j, length[-1])
+                                lowest.insert(j, length[0])
+                            elif idx2 > highest[j] and  idx2 + len(tString2) - 1 < lowest[j + 1]:
+                                qubit = insertList(qubit, j + 1, rOrder[i])
+                                alrAdded.insert(j + 1, length)
+                                highest.insert(j + 1, length[-1])
+                                lowest.insert(j + 1, length[0])
+                        else:
+                            if idx2 + len(tString2) - 1 <= lowest[j]:               
+                                ubit = insertList(qubit, j, rOrder[i])
+                                alrAdded.insert(j, length)
+                                highest.insert(j, length[-1])
+                                lowest.insert(j, length[0])
+                            elif idx2 > lowest[j]:
+                                print(rOrder[i])
+                                qubit = insertList(qubit, j + 1, rOrder[i])
+                                alrAdded.insert(j + 1, length)
+                                highest.insert(j + 1, length[-1])
+                                lowest.insert(j + 1, length[0])
+            
+                    
+            
+        else:
+            idx1 = []
+            tString1 = ','.join(tOrder[i])
+            tString1 = tString1.replace(',', '')
+            print(tString1)
+            for a in range(len(tString1)):
+                if a == 0:
+                    if tString1[a] == 'x' and len(xList) > 0:
+                        idx1 = xList[0]
+                        xList.pop(0)
+                    elif tString1[a] == 'y' and len(yList) > 0:
+                        idx1 = yList[0]
+                        yList.pop(0)
+                    elif tString1[a] == 'z' and len(zList) > 0:
+                        idx1 = zList[0]
+                        yList.pop(0)
+                    elif tString1[a] == 'h' and len(hList) > 0:
+                        idx1 = hList[0]
+                        hList.pop(0)
+                else:
+                    if tString1[a] == 'x' and len(xList) > 0:
+                        xList.pop(0)
+                    elif tString1[a] == 'y' and len(yList) > 0:
+                        yList.pop(0)
+                    elif tString1[a] == 'z' and len(zList) > 0:
+                        yList.pop(0)
+                    elif tString1[a] == 'h' and len(hList) > 0:
+                        hList.pop(0)
+            if idx1 == []: 
+                idx1 = qString.index(tString1)
+            lst = list(range(idx1, idx1 + len(tString1)))
+            alrAdded.append(lst)
+            highest.append(lst[-1])
+            lowest.append(lst[0])
+            qubit = insertList(qubit, 0, rOrder[i])
+    #         print(alrAdded)
+    #         print(highest)
+    #         print(lowest)
+        print('qubit')
+        print(qubit)
+
+def insertList(qubit, pos, lst):
+    for i in range(len(lst)):
+        qubit.insert(i + pos, lst[i])
+    
+    return qubit
+            
+def list_duplicates_of(seq,item):
+    start_at = -1
+    locs = []
+    while True:
+        try:
+            loc = seq.index(item,start_at+1)
+        except ValueError:
+            break
+        else:
+            locs.append(loc)
+            start_at = loc
+    return locs
 
 def enhance(keyDF, qubitGates, typeOfGates):
     #print(qubitGates)
@@ -202,18 +423,18 @@ def enhance(keyDF, qubitGates, typeOfGates):
         qList = list_split(qubit)
         for gate in qList:
             if normalGate(gate):
-                print(gate)
                 combos = viableCombos(gate)
-
+                #print(combos)
                 targets, replacements = comboSynonyms(keyDF, combos)
                 # print('replacements')
                 # print(replacements)
                 replacementTimes = times(replacements)
                 targetTimes = times(targets)
+                #print(replacementTimes)
                 # print(replacementTimes)
                 # print(targets)
-                array = bestCombo(replacements, replacementTimes, targetTimes)
-                #if replacement gate is a gate vs a replacement of no gate
+                rOrder, tOrder = bestCombo(replacements, targets, replacementTimes, targetTimes)
+                qubitOrder(rOrder, tOrder, gate)
             
             
     # qc = QuantumCircuit(len(final), len(final))
@@ -267,22 +488,25 @@ def optimize(qc):
 qc = QuantumCircuit(2, 2)
 qc.z(0)
 qc.y(0)
-qc.z(0)
-qc.y(0)
-qc.y(0)
+qc.h(0)
+qc.h(0)
 qc.x(0)
-qc.h(0)
-qc.h(0)
-qc.z(0)
-qc.y(0)
-qc.z(0)
 qc.y(0)
 qc.y(0)
 qc.x(1)
+qc.h(1)
+qc.h(1)
 qc.cx(1, 0)
 
+qc1 = QuantumCircuit(2, 2)
+qc1.h(0)
+qc1.y(0)
+qc1.x(1)
+qc1.h(1)
+qc1.cx(1, 0)
+
 qc1 = optimize(qc)
-# print(qc)
+print(qc)
 
 # from qiskit.visualization import plot_bloch_multivector, plot_histogram, array_to_latex
 # sim = Aer.get_backend('qasm_simulator')
