@@ -186,6 +186,17 @@ def sortListIdxsRev(lst):
         sort_index.append(x[1])
     return sort_index
 
+def sortListIdx(lst):
+    li=[]
+    for i in range(len(lst)):
+        li.append([lst[i],i])
+    li.sort()
+    sort_index = []
+    
+    for x in li:
+        sort_index.append(x[1])
+    return sort_index
+
 def bestCombo(replacements, targets, replacementTimes, targetTimes):
     #get time difference
     # print(replacements)
@@ -451,9 +462,40 @@ def organizedOrder(finalAll, targetsAll, qcDF):
     print('')
     #look at later
     qubit = 0
-    while qubit < len(finalAll):
+    filter = False
+    for m in range(0, 500): #figure out how to wait till all qubits in finalAll are empty
         # print('num')
         # print(qubit)
+        first = []
+        idxs = []
+        for qubit in range(len(finalAll)):
+            for gate in  range(len(finalAll[qubit])):
+                if len(finalAll[qubit][gate]) == 3 and finalAll[qubit][gate][2] == 'cx':
+                    first.append(qubit)
+                    idxs.append(gate)
+                elif len(finalAll[qubit][gate]) == 3 and finalAll[qubit][gate][2] == 'connector':
+                    first.append(qubit)
+                    idxs.append(gate)
+                    
+        sortedidx = sortListIdx(idxs)    
+        order = []    
+        for i in range(len(sortedidx)):
+            order.append(first[sortedidx[i]])      
+        
+        print(order)
+        # if len(order) == 0:
+        #     if filter == False:
+        #         qubit = 0
+        #         filter = True
+        #     else:
+        #         qubit += 1
+        # else:
+        if len(order) > 0:
+            qubit = order[0]
+        elif filter == False:
+            qubit = 0
+            filter = True
+        print(qubit)
         for gate in range(len(finalAll[qubit])):
             # print(len(finalAll[qubit]))
             # print(gate)
@@ -470,9 +512,11 @@ def organizedOrder(finalAll, targetsAll, qcDF):
             if len(finalAll[qubit][0]) == 3 and finalAll[qubit][0][2] == 'cx':
                 for gate2 in range(len(finalAll[int(finalAll[qubit][0][1])])):
                     #change to make sure the connector has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][2] == 'connector':
+                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] == finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][1] == finalAll[qubit][0][1] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'connector':
                         finalAll[int(finalAll[qubit][0][1])].pop(0)
                         break
+                    elif len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] != finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'connector':
+                        pass
                     else:
                         temp = []
                         # print(finalAll[int(finalAll[qubit][0][1])][0])
@@ -492,7 +536,7 @@ def organizedOrder(finalAll, targetsAll, qcDF):
                 for gate2 in finalAll[int(finalAll[qubit][0][0])]:
                     
                     #change to make sure the cx has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][2] == 'cx':
+                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] == finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][1] == finalAll[qubit][0][1] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'cx':
                         temp = []
                         temp.append(int(finalAll[qubit][0][0]))
                         temp.append(finalAll[int(finalAll[qubit][0][0])][0])
@@ -500,6 +544,8 @@ def organizedOrder(finalAll, targetsAll, qcDF):
                         main.append(temp)
                         finalAll[int(finalAll[qubit][0][0])].pop(0)
                         break
+                    elif len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] != finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'cx':
+                        pass
                     else:
                         temp = []
                         temp.append(int(finalAll[qubit][0][0]))
@@ -515,68 +561,10 @@ def organizedOrder(finalAll, targetsAll, qcDF):
                 print(temp)
                 main.append(temp)
                 finalAll[qubit].pop(0)
-        qubit += 1
-    print('main')
-    print(main)
+        print('main')
+        print(main)
+    # qubit += 1
     
-    
-    
-    # #remove connected markers
-    # for q in finalAll:
-    #     listToPop = []
-    #     for combo in range(len(q)):
-    #         if len(q[combo]) == 3 and q[combo][2] == 'connector':
-    #             listToPop.append(combo)
-    #     listToPop.sort(reverse=True)
-    #     for i in listToPop:
-    #         q.pop(i)
-            
-    # for q in targetsAll:
-    #     listToPop = []      
-    #     for combo in range(len(q)):
-    #         if len(q[combo]) == 3 and q[combo][2] == 'connector':
-    #             listToPop.append(combo)
-    #     listToPop.sort(reverse=True)
-    #     for i in listToPop:
-    #         q.pop(i)
-
-    # # print(qubitList)
-    # # print(gateList)
-    # #print(finalAll)
-    # # print(targetsAll)
-    
-    # avoid = []
-    # for i in range(len(qubitList)):
-    #     temp = []
-    #     if i not in avoid:
-    #         if len(str(qubitList[i])) == 1:
-    #             try:
-    #                 # print(targetsAll[int(qubitList[i])][0])
-    #                 temp.append(int(qubitList[i]))
-    #                 temp.append(finalAll[int(qubitList[i])][0])
-    #                 main.append(temp)
-    #                 for j in range(len(targetsAll[int(qubitList[i])][0])):
-    #                     if qubitList[j] == qubitList[i]:
-    #                         avoid.append(j)
-    #                 finalAll[int(qubitList[i])].pop(0)
-    #                 targetsAll[int(qubitList[i])].pop(0)
-    #             except:
-    #                 pass
-    #         else:
-    #             try:
-    #                 # print(targetsAll[int(qubitList[i][0])][0])
-    #                 temp.append(int(qubitList[i][0]))
-    #                 temp.append(finalAll[int(qubitList[i][0])][0])
-    #                 main.append(temp)
-    #                 for j in range(len(targetsAll[int(qubitList[i][0])][0])):
-    #                     if qubitList[j] == qubitList[i]:
-    #                         avoid.append(j)
-    #                 finalAll[int(qubitList[i][0])].pop(0)
-    #                 targetsAll[int(qubitList[i][0])].pop(0)
-    #             except:
-    #                 pass
-    # print(main)
-    # print('')
     return main
                        
         
@@ -593,7 +581,9 @@ def handler(keyDF, qubitGates, qcDF):
             if normalGate(gate):
                 combos = viableCombos(gate)
                 targets, replacements = comboSynonyms(keyDF, combos)
+                print('targer')
                 print(targets)
+                print('replacements')
                 print(replacements)
                 replacementTimes = times(replacements)
                 targetTimes = times(targets)
@@ -644,37 +634,23 @@ def optimize(qc):
     
     return qc1
 
-qc = QuantumCircuit(3, 3)
+qc = QuantumCircuit(2, 2)
 qc.x(0)
 qc.x(1)
 qc.cx(0,1)
-qc.y(2)
-qc.cx(2, 1)
 qc.x(0)
-qc.h(2)
 qc.z(0)
-qc.cx(2, 0)
-qc.x(2)
 qc.y(0)
 qc.cx(0, 1)
-qc.x(2)
 qc.x(1)
 qc.cx(1, 0)
 qc.x(1)
 qc.y(1)
-qc.cx(0, 2)
-qc.z(2)
 qc.y(0)
 qc.y(0)
 qc.x(1)
-qc.cx(0, 2)
-qc.y(2)
 qc.x(0)
-qc.y(2)
-qc.cx(1, 2)
-qc.z(2)
 qc.y(0)
-qc.cx(2, 1)
 
 qc1 = optimize(qc)
 print(qc)
@@ -684,8 +660,8 @@ qc.measure_all()
 result = execute(qc, backend=sim, shots = 1024).result()
 results = result.get_counts()
 print(results)
-# print(qc1)
-# qc1.measure_all()
-# result = execute(qc1, backend=sim, shots = 1024).result()
-# results = result.get_counts()
-# print(results)
+print(qc1)
+qc1.measure_all()
+result = execute(qc1, backend=sim, shots = 1024).result()
+results = result.get_counts()
+print(results)
