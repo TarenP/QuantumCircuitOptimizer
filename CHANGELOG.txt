@@ -9,3 +9,8 @@ Change Log
 --------------
 -Optimizer works with logic to minimize the amount of gates used
 -Working on Readme file
+
+0.1.4 (7/14/22)
+--------------
+-Optimizer logic makes circuits more efficient
+-Only tested with 3 qubits so far, more testing needed
