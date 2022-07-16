@@ -463,7 +463,7 @@ def organizedOrder(finalAll, targetsAll, qcDF):
     #look at later
     qubit = 0
     filter = False
-    for m in range(0, 500): #figure out how to wait till all qubits in finalAll are empty
+    for m in range(0, 10): #figure out how to wait till all qubits in finalAll are empty
         # print('num')
         # print(qubit)
         first = []
@@ -482,6 +482,7 @@ def organizedOrder(finalAll, targetsAll, qcDF):
         for i in range(len(sortedidx)):
             order.append(first[sortedidx[i]])      
         
+        print('order')
         print(order)
         # if len(order) == 0:
         #     if filter == False:
@@ -500,7 +501,7 @@ def organizedOrder(finalAll, targetsAll, qcDF):
             # print(len(finalAll[qubit]))
             # print(gate)
             # print(main)
-            
+            qgate = finalAll[qubit][0]
             
             #possibility of appending cx while looking for connector(or other way around). This would screw up the rest of code
             #figure out if I can/how to pass through cx if looking for connector(or other way around).
@@ -509,55 +510,61 @@ def organizedOrder(finalAll, targetsAll, qcDF):
             #after that process of sorting for that cx or connector is done, look again and repeat
             #if no more cx or connectors left, go in order of qubit
             
-            if len(finalAll[qubit][0]) == 3 and finalAll[qubit][0][2] == 'cx':
-                for gate2 in range(len(finalAll[int(finalAll[qubit][0][1])])):
+            if len(qgate) == 3 and qgate[2] == 'cx':
+                for gate2 in range(len(finalAll[int(qgate[1])])):
                     #change to make sure the connector has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] == finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][1] == finalAll[qubit][0][1] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'connector':
-                        finalAll[int(finalAll[qubit][0][1])].pop(0)
+                    if len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] == qgate[0] and finalAll[int(qgate[1])][0][1] == qgate[1] and finalAll[int(qgate[1])][0][2] == 'connector':
+                        finalAll[int(qgate[1])].pop(0)
                         break
-                    elif len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] != finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'connector':
+                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] != qgate[0] and finalAll[int(qgate[1])][0][2] == 'connector':
+                        pass
+                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][2] == 'cx':
                         pass
                     else:
                         temp = []
                         # print(finalAll[int(finalAll[qubit][0][1])][0])
-                        temp.append(int(finalAll[qubit][0][1]))
-                        print(temp)
-                        temp.append(finalAll[int(finalAll[qubit][0][1])][0])
+                        temp.append(int(qgate[1]))
+                        # print(temp)
+                        temp.append(finalAll[int(qgate[1])][0])
                         print(temp)
                         main.append(temp)
-                        finalAll[int(finalAll[qubit][0][1])].pop(0)
+                        finalAll[int(qgate[1])].pop(0)
                 temp = []
                 temp.append(qubit)
-                temp.append(finalAll[qubit][0])
+                temp.append(qgate)
                 print(temp)
                 main.append(temp)
                 finalAll[qubit].pop(0)
-            elif len(finalAll[qubit][0]) == 3 and finalAll[qubit][0][2] == 'connector':
-                for gate2 in finalAll[int(finalAll[qubit][0][0])]:
-                    
+            elif len(qgate) == 3 and qgate[2] == 'connector':
+                for gate2 in range(len(finalAll[int(qgate[0])])):
+                    print('check')
+                    print(finalAll[int(qgate[0])][0])
+                    print(qgate[0])
                     #change to make sure the cx has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] == finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][1] == finalAll[qubit][0][1] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'cx':
+                    if len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] == qgate[0] and finalAll[int(qgate[1])][0][1] == qgate[1] and finalAll[int(qgate[1])][0][2] == 'cx':
                         temp = []
-                        temp.append(int(finalAll[qubit][0][0]))
-                        temp.append(finalAll[int(finalAll[qubit][0][0])][0])
+                        temp.append(int(qgate[0]))
+                        temp.append(finalAll[int(qgate[0])][0])
                         print(temp)
                         main.append(temp)
-                        finalAll[int(finalAll[qubit][0][0])].pop(0)
+                        finalAll[int(qgate[0])].pop(0)
                         break
-                    elif len(finalAll[int(finalAll[qubit][0][1])][0]) == 3 and finalAll[int(finalAll[qubit][0][1])][0][0] != finalAll[qubit][0][0] and finalAll[int(finalAll[qubit][0][1])][0][2] == 'cx':
+                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] != qgate[0] and finalAll[int(qgate[1])][0][2] == 'cx':
+                        pass
+                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][2] == 'connector':
                         pass
                     else:
                         temp = []
-                        temp.append(int(finalAll[qubit][0][0]))
-                        temp.append(finalAll[int(finalAll[qubit][0][0])][0])
+                        temp.append(int(qgate[0]))
+                        temp.append(finalAll[int(qgate[0])][0])
                         print(temp)
                         main.append(temp)
-                        finalAll[int(finalAll[qubit][0][0])].pop(0)
+                        finalAll[int(qgate[0])].pop(0)
                 finalAll[qubit].pop(0)
             else:
                 temp = []
                 temp.append(qubit)
-                temp.append(finalAll[qubit][0])
+                temp.append(qgate)
                 print(temp)
                 main.append(temp)
                 finalAll[qubit].pop(0)
@@ -639,18 +646,22 @@ qc.x(0)
 qc.x(1)
 qc.cx(0,1)
 qc.x(0)
-qc.z(0)
+qc.z(1)
+qc.cx(1,0)
+qc.cx(0,1)
 qc.y(0)
+qc.y(0)
+qc.cx(1,0)
+qc.x(1)
+qc.cx(1,0)
+qc.x(1)
+qc.z(1)
 qc.cx(0, 1)
-qc.x(1)
-qc.cx(1, 0)
-qc.x(1)
-qc.y(1)
 qc.y(0)
-qc.y(0)
+qc.cx(1,0)
 qc.x(1)
-qc.x(0)
-qc.y(0)
+qc.z(1)
+qc.cx(0, 1)
 
 qc1 = optimize(qc)
 print(qc)
