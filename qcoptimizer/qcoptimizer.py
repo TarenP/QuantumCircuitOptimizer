@@ -125,7 +125,7 @@ def list_split(l):
     
 def viableCombos(qlist):
                 
-    combo = [com for sub in range(len(typeOfGates)) for com in combinations(qlist, sub + 1)]
+    combo = [com for sub in range(4) for com in combinations(qlist, sub + 1)]
     combos = []
     qString = ','.join(qlist)
     for c in combo:
@@ -249,7 +249,7 @@ def bestCombo(replacements, targets, replacementTimes, targetTimes):
 def qubitOrder(rOrder, tOrder, gate):
     qString = ','.join(gate)
     qString = qString.replace(',', '')
-    #print(qString)
+    # print(qString)
     
     # print(tOrder)
     # print(rOrder)
@@ -264,7 +264,7 @@ def qubitOrder(rOrder, tOrder, gate):
     yList = list_duplicates_of(qString, 'y')
     hList = list_duplicates_of(qString, 'h')
     zList = list_duplicates_of(qString, 'z')
-    
+    # print(yList)
     refxList = list_duplicates_of(qString, 'x')
     refyList = list_duplicates_of(qString, 'y')
     refhList = list_duplicates_of(qString, 'h')
@@ -383,7 +383,7 @@ def qubitOrder(rOrder, tOrder, gate):
             idx1 = []
             tString1 = ','.join(tOrder[i])
             tString1 = tString1.replace(',', '')
-            #print(tString1)
+            # print(tString1)
             for a in range(len(tString1)):
                 if a == 0:
                     if tString1[a] == 'x' and len(xList) > 0:
@@ -413,21 +413,35 @@ def qubitOrder(rOrder, tOrder, gate):
             alrAdded.append(lst)
             highest.append(lst[-1])
             lowest.append(lst[0])
-            qubit = insertList(qubit, 0, rOrder[i])
-            targets = insertList(targets, 0, tOrder[i])
-            #print(qubit)
-        # print('alradded')
-        # print(alrAdded)
-        # print('high/low')
-        # print(highest)
-        # print(lowest)
-        # print('qubit')
-        # print(qubit)
+            qubit = appendList(qubit, rOrder[i])
+            targets = appendList(targets, tOrder[i])
+    #         print(targets)
+    #         print('alradded')
+    #         print(alrAdded)
+    #         print('high/low')
+    #         print(highest)
+    #         print(lowest)
+    #         print('qubit')
+    #         print(qubit)
+    # print(targets)
+    # print('alradded')
+    # print(alrAdded)
+    # print('high/low')
+    # print(highest)
+    # print(lowest)
+    # print('qubit')
+    # print(qubit)
     return qubit, targets
 
 def insertList(qubit, pos, lst):
     for i in range(len(lst)):
         qubit.insert(i + pos, lst[i])
+    
+    return qubit
+
+def appendList(qubit, lst):
+    for i in lst:
+        qubit.append(i)
     
     return qubit
             
@@ -446,7 +460,7 @@ def list_duplicates_of(seq,item):
 
 def qcAppendNormal(qc, final):
     for g in final:
-        print(g)
+        #print(g)
         if len(g[1]) == 3 and g[1][2] == 'cx':
             getattr(qc, g[1][2])(int(g[1][0]), int(g[1][1]))
         elif len(g[1]) > 1:
@@ -458,123 +472,92 @@ def qcAppendNormal(qc, final):
 
 def organizedOrder(finalAll, targetsAll, qcDF):
     main = []
-    print(finalAll)
-    print('')
-    #look at later
-    qubit = 0
-    filter = False
-    for m in range(0, 10): #figure out how to wait till all qubits in finalAll are empty
-        # print('num')
-        # print(qubit)
-        first = []
-        idxs = []
-        for qubit in range(len(finalAll)):
-            for gate in  range(len(finalAll[qubit])):
-                if len(finalAll[qubit][gate]) == 3 and finalAll[qubit][gate][2] == 'cx':
-                    first.append(qubit)
-                    idxs.append(gate)
-                elif len(finalAll[qubit][gate]) == 3 and finalAll[qubit][gate][2] == 'connector':
-                    first.append(qubit)
-                    idxs.append(gate)
-                    
-        sortedidx = sortListIdx(idxs)    
-        order = []    
-        for i in range(len(sortedidx)):
-            order.append(first[sortedidx[i]])      
-        
-        print('order')
-        print(order)
-        # if len(order) == 0:
-        #     if filter == False:
-        #         qubit = 0
-        #         filter = True
-        #     else:
-        #         qubit += 1
-        # else:
-        if len(order) > 0:
-            qubit = order[0]
-        elif filter == False:
-            qubit = 0
-            filter = True
-        print(qubit)
-        for gate in range(len(finalAll[qubit])):
-            # print(len(finalAll[qubit]))
-            # print(gate)
-            # print(main)
-            qgate = finalAll[qubit][0]
-            
-            #possibility of appending cx while looking for connector(or other way around). This would screw up the rest of code
-            #figure out if I can/how to pass through cx if looking for connector(or other way around).
-            
-            #Try looking at which qubit has the first cx or connector
-            #after that process of sorting for that cx or connector is done, look again and repeat
-            #if no more cx or connectors left, go in order of qubit
-            
-            if len(qgate) == 3 and qgate[2] == 'cx':
-                for gate2 in range(len(finalAll[int(qgate[1])])):
-                    #change to make sure the connector has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] == qgate[0] and finalAll[int(qgate[1])][0][1] == qgate[1] and finalAll[int(qgate[1])][0][2] == 'connector':
-                        finalAll[int(qgate[1])].pop(0)
-                        break
-                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] != qgate[0] and finalAll[int(qgate[1])][0][2] == 'connector':
-                        pass
-                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][2] == 'cx':
-                        pass
-                    else:
-                        temp = []
-                        # print(finalAll[int(finalAll[qubit][0][1])][0])
-                        temp.append(int(qgate[1]))
-                        # print(temp)
-                        temp.append(finalAll[int(qgate[1])][0])
-                        print(temp)
-                        main.append(temp)
-                        finalAll[int(qgate[1])].pop(0)
-                temp = []
-                temp.append(qubit)
-                temp.append(qgate)
-                print(temp)
-                main.append(temp)
-                finalAll[qubit].pop(0)
-            elif len(qgate) == 3 and qgate[2] == 'connector':
-                for gate2 in range(len(finalAll[int(qgate[0])])):
-                    print('check')
-                    print(finalAll[int(qgate[0])][0])
-                    print(qgate[0])
-                    #change to make sure the cx has the same [0] and [1] cuz could be connected to diff qubit
-                    if len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] == qgate[0] and finalAll[int(qgate[1])][0][1] == qgate[1] and finalAll[int(qgate[1])][0][2] == 'cx':
-                        temp = []
-                        temp.append(int(qgate[0]))
-                        temp.append(finalAll[int(qgate[0])][0])
-                        print(temp)
-                        main.append(temp)
-                        finalAll[int(qgate[0])].pop(0)
-                        break
-                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][0] != qgate[0] and finalAll[int(qgate[1])][0][2] == 'cx':
-                        pass
-                    elif len(finalAll[int(qgate[1])][0]) == 3 and finalAll[int(qgate[1])][0][2] == 'connector':
-                        pass
-                    else:
-                        temp = []
-                        temp.append(int(qgate[0]))
-                        temp.append(finalAll[int(qgate[0])][0])
-                        print(temp)
-                        main.append(temp)
-                        finalAll[int(qgate[0])].pop(0)
-                finalAll[qubit].pop(0)
-            else:
-                temp = []
-                temp.append(qubit)
-                temp.append(qgate)
-                print(temp)
-                main.append(temp)
-                finalAll[qubit].pop(0)
-        print('main')
-        print(main)
-    # qubit += 1
+    # print(finalAll[0])
+    # print(finalAll[1])
+    # print(targetsAll)
+    # print('')
+    for q in finalAll:
+        listToPop = []
+        for g in range(len(q)):
+            if len(q[g]) == 3 and q[g][2] =='connector':
+                listToPop.append(g)
+        # print(listToPop)
+        listToPop.sort(reverse= True)
+        # print(listToPop)
+        for i in listToPop:
+            # print(q[i])
+            q.pop(i)
+    for q in targetsAll:
+        listToPop = []
+        for g in range(len(q)):
+            if len(q[g]) == 3 and q[g][2] =='connector':
+                listToPop.append(g)
+        # print(listToPop)
+        listToPop.sort(reverse= True)
+        # print(listToPop)
+        for i in listToPop:
+            # print(q[i])
+            q.pop(i)
+    # print(finalAll[0])
+    # print(finalAll[1])
+    # print(targetsAll)
+    # print('')
     
+    qnums = qcDF['Qubit'].tolist()
+    # print(qnums)
+    loop = []
+    while len(finalAll) > len(loop):
+        if len(qnums[0]) == 1:
+            # print('h')
+            # print(qnums)
+            # print(main)
+            # print(finalAll)
+            # print(targetsAll)
+            # print('')
+            temp = []
+            temp.append(qnums[0])
+            temp.append(finalAll[int(qnums[0])][0])
+            main.append(temp)
+            #store num to del
+            num = qnums[0]
+            # print(len(targetsAll[int(qnums[0])][0]))
+            for i in range(len(targetsAll[int(qnums[0])][0])):
+                qnums.remove(num)
+            targetsAll[int(num)].pop(0)
+            finalAll[int(num)].pop(0)
+            # print(qnums)
+            # print(main)
+            # print(finalAll)
+            # print(targetsAll)
+            # print('')
+        else:
+            # print('h')
+            # print(qnums)
+            # print(main)
+            # print(finalAll)
+            # print(targetsAll)
+            # print('')
+            num = qnums[0]
+            #print(len(targetsAll[int(qnums[0][0])][0]))
+            temp = []
+            temp.append(qnums[0][0])
+            temp.append(finalAll[int(qnums[0][0])][0])
+            main.append(temp)
+            qnums.remove(qnums[0])
+            targetsAll[int(num[0])].pop(0)
+            finalAll[int(num[0])].pop(0)
+            # print(qnums)
+            # print(main)
+            # print(finalAll)
+            # print(targetsAll)
+            # print('')
+        #Check if lists in final are all empty
+        for f in range(len(finalAll)):
+            if len(finalAll[f]) == 0 and f not in loop:
+                loop.append(f)
+    # print(main)        
     return main
-                       
-        
+                             
 def handler(keyDF, qubitGates, qcDF):
     #print(qubitGates)
     finalAll = []
@@ -582,42 +565,48 @@ def handler(keyDF, qubitGates, qcDF):
     qc = QuantumCircuit(len(qubitGates), len(qubitGates))
     for qubit in range(len(qubitGates)):
         qList = list_split(qubitGates[qubit])
+        #print(qList)
         final = []
         finalTargets = []
         for gate in qList:
+            # print(gate)
             if normalGate(gate):
                 combos = viableCombos(gate)
+                #print(combos)
                 targets, replacements = comboSynonyms(keyDF, combos)
-                print('targer')
-                print(targets)
-                print('replacements')
-                print(replacements)
+                # print('targer')
+                # print(targets)
+                # print('replacements')
+                # print(replacements)
                 replacementTimes = times(replacements)
                 targetTimes = times(targets)
                 #print(replacementTimes)
                 # print(replacementTimes)
                 # print(targets)
                 rOrder, tOrder = bestCombo(replacements, targets, replacementTimes, targetTimes)
+                # print(rOrder)
                 sequence, targets = qubitOrder(rOrder, tOrder, gate)
-                print(sequence)
+                # print('seq')
+                # print(sequence)
+                # print(targets)
                 final.append(sequence)
-                finalTargets.append(targets)
+                finalTargets.append(gate)
             else:
                 final.append(gate)
                 finalTargets.append(gate)
         finalAll.append(final)
+        # print(finalAll)
         targetsAll.append(finalTargets)
     #Final qc gate order, append to qc
     main = organizedOrder(finalAll, targetsAll, qcDF)
     qcAppendNormal(qc, main)
     return qc
   
-
-def checker(qc, size):
-    qc.measure(size-1, size-1)
+def checker(qc):
+    qc.measure_all()
     result = execute(qc, backend=sim, shots = 1024).result()
-    #plot_histogram(counts)
-    return result.time_taken
+    results = result.get_counts()
+    return results
 
 def optimize(qc):
     keyDF = KeytoDF()
@@ -627,6 +616,30 @@ def optimize(qc):
     for i in range(len(qc.qubits)):
         qubitGates.append(GateList(i, qcDF))
     qc1 = handler(keyDF, qubitGates, qcDF)
+    return qc1
+    # print(qc1)
+    # oldqc = qc
+    # newqc = qc1
+    # oldcounts = checker(oldqc)
+    # newcounts = checker(newqc)
+    # print('old')
+    # print(oldcounts)
+    # print('new')
+    # print(newcounts)
+    # if oldcounts == newcounts:
+    #     return qc1
+    # else:
+    #     for i in range(0, 50):
+    #         qubitGates = []
+    #         for i in range(len(qc.qubits)):
+    #             qubitGates.append(GateList(i, qcDF))
+    #         qc1 = handler(keyDF, qubitGates, qcDF)
+    #         newqc = qc1
+    #         newcounts = checker(newqc)
+    #         if newcounts == oldcounts:
+    #             return qc1
+    #     print("timed out, couldn't create a quantum circuit")
+        
     # c1 = checker(qc1, len(qc1.qubits))
     # c2 = checker(qc, len(qc.qubits))
     # print(c1)
@@ -638,41 +651,62 @@ def optimize(qc):
     # else:
     #     print("Optimized QC is slower by: ")
     #     print(c1-c2)
-    
-    return qc1
 
-qc = QuantumCircuit(2, 2)
+
+qc = QuantumCircuit(5, 5)
 qc.x(0)
-qc.x(1)
+qc.x(2)
 qc.cx(0,1)
 qc.x(0)
-qc.z(1)
-qc.cx(1,0)
+qc.h(0)
+qc.y(3)
+qc.x(2)
+qc.cx(2,1)
+qc.x(0)
+qc.h(4)
+qc.y(4)
+qc.y(3)
+qc.cx(3,2)
+qc.x(2)
+qc.x(3)
 qc.cx(0,1)
-qc.y(0)
-qc.y(0)
-qc.cx(1,0)
-qc.x(1)
-qc.cx(1,0)
-qc.x(1)
-qc.z(1)
-qc.cx(0, 1)
-qc.y(0)
-qc.cx(1,0)
-qc.x(1)
-qc.z(1)
-qc.cx(0, 1)
+qc.x(0)
+qc.h(4)
+qc.y(4)
+qc.x(4)
+qc.cx(2,1)
+qc.x(3)
+qc.h(3)
+qc.y(3)
+qc.y(2)
+qc.cx(3,4)
+qc.x(2)
+qc.x(4)
+qc.cx(2,4)
+qc.x(0)
+qc.h(2)
+qc.y(3)
+qc.x(2)
+qc.cx(2,1)
+qc.x(2)
+qc.h(1)
+qc.y(2)
+qc.y(2)
+qc.cx(0,3)
+qc.x(4)
 
-qc1 = optimize(qc)
+
+
 print(qc)
+qc1 = optimize(qc)
 from qiskit.visualization import plot_bloch_multivector, plot_histogram, array_to_latex
 sim = Aer.get_backend('qasm_simulator')
 qc.measure_all()
 result = execute(qc, backend=sim, shots = 1024).result()
 results = result.get_counts()
-print(results)
+print(len(results))
 print(qc1)
 qc1.measure_all()
 result = execute(qc1, backend=sim, shots = 1024).result()
 results = result.get_counts()
-print(results)
+print(len(results))
