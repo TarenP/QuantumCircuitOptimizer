@@ -19,3 +19,8 @@ Change Log
 --------------
 -logic is now stable and works with quantum entanglement
 -Tested with up to 5 qubits
+
+0.2.4 (7/19/22)
+--------------
+-Google drive errors with pulling file from site
+-Need to load key with qcoptimizer.KeytoDF() then use optimizer

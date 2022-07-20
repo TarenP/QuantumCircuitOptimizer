@@ -45,7 +45,7 @@ def QCtoDF(qc):
 
 #Clean up the data in csv to fit conventional list look
 def KeytoDF():
-    url='https://drive.google.com/file/d/14xmXvA6Y84nk1phQ6mht3EkOhmW_7J4L/view?usp=sharing'
+    url='https://drive.google.com/file/d/1qs8pNb8ujilJLDU4Ds6NtfnCaYtY4s9F/view?usp=sharing'
     url='https://drive.google.com/uc?id=' + url.split('/')[-2]
     df = pd.read_csv(url)
     df = df.fillna('i')
@@ -598,8 +598,7 @@ def checker(qc):
     results = result.get_counts()
     return results
 
-def optimize(qc):
-    keyDF = KeytoDF()
+def optimize(qc, keyDF):
     #print(keyDF)
     qcDF = QCtoDF(qc)
     qubitGates = []
