@@ -24,3 +24,7 @@ Change Log
 --------------
 -Google drive errors with pulling file from site
 -Need to load key with qcoptimizer.KeytoDF() then use optimizer
+
+0.2.5 (7/21/22)
+--------------
+-Updated synonym generator because it was not provind accurate replacements

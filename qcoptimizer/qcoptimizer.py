@@ -45,7 +45,7 @@ def QCtoDF(qc):
 
 #Clean up the data in csv to fit conventional list look
 def KeytoDF():
-    url='https://drive.google.com/file/d/1qs8pNb8ujilJLDU4Ds6NtfnCaYtY4s9F/view?usp=sharing'
+    url='https://drive.google.com/file/d/1CcAbTNkW2LOxG2Hz3fXDFEFPCVg8Dt_q/view?usp=sharing'
     url='https://drive.google.com/uc?id=' + url.split('/')[-2]
     df = pd.read_csv(url)
     df = df.fillna('i')
@@ -293,7 +293,6 @@ def qubitOrder(rOrder, tOrder, gate):
                         elif qString[m] == 'y':
                             yList.pop(0)
                         elif qString[m] == 'z':
-                            print(m)
                             zList.pop(0)
                         elif qString[m] == 'h':
                             hList.pop(0)
@@ -551,7 +550,7 @@ def handler(keyDF, qubitGates, qcDF):
     qc = QuantumCircuit(len(qubitGates), len(qubitGates))
     for qubit in range(len(qubitGates)):
         qList = list_split(qubitGates[qubit])
-        #print(qList)
+        # print(qList)
         final = []
         finalTargets = []
         for gate in qList:
@@ -606,37 +605,5 @@ def optimize(qc, keyDF):
         qubitGates.append(GateList(i, qcDF))
     qc1 = handler(keyDF, qubitGates, qcDF)
     return qc1
-    # print(qc1)
-    # oldqc = qc
-    # newqc = qc1
-    # oldcounts = checker(oldqc)
-    # newcounts = checker(newqc)
-    # print('old')
-    # print(oldcounts)
-    # print('new')
-    # print(newcounts)
-    # if oldcounts == newcounts:
-    #     return qc1
-    # else:
-    #     for i in range(0, 50):
-    #         qubitGates = []
-    #         for i in range(len(qc.qubits)):
-    #             qubitGates.append(GateList(i, qcDF))
-    #         qc1 = handler(keyDF, qubitGates, qcDF)
-    #         newqc = qc1
-    #         newcounts = checker(newqc)
-    #         if newcounts == oldcounts:
-    #             return qc1
-    #     print("timed out, couldn't create a quantum circuit")
-        
-    # c1 = checker(qc1, len(qc1.qubits))
-    # c2 = checker(qc, len(qc.qubits))
-    # print(c1)
-    # print(c2)
-    # if c1 < c2:
-    #     print("Optimized QC is faster by: ")
-    #     print(c2-c1)
-        
-    # else:
-    #     print("Optimized QC is slower by: ")
-    #     print(c1-c2)
+
+
