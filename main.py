@@ -13,6 +13,47 @@ import pandas as pd
 import time
 
 
+#Redundant delete later
+#-------------------------------------------------------------
+
+from qiskit import *
+import pandas as pd
+from qiskit import transpile
+import random
+import csv
+import numpy as np
+from qiskit.providers.aer import AerSimulator
+import time
+import itertools
+import random
+import progressbar
+import pathlib
+from IPython.display import clear_output
+from qiskit.tools.monitor import job_monitor
+
+from qiskit import IBMQ, Aer
+from qiskit.providers.aer.noise import NoiseModel
+provider = IBMQ.load_account()
+# IBMQ.load_account()
+# provider = IBMQ.get_provider('ibm-q')
+backend = provider.get_backend('ibm_nairobi')
+
+qubitCount = 7
+runs = 3
+
+noise_model = NoiseModel.from_backend(backend)
+
+# Get coupling map from backend
+coupling_map = backend.configuration().coupling_map
+
+# Get basis gates from noise model
+basis_gates = noise_model.basis_gates
+
+readTime = 0
+
+#-----------------------------------------------------------
+
+
 Gates = ['x', 'y', 'z', 'h', 'cx', 'swap']
 gateCosts = [1, 1, 1, 2, 5, 11]
 
@@ -89,10 +130,17 @@ def ComplexityFinder(qc):
     return cost, depth
 
 def selector(qc):
+    #Remove global when packaging
+    global readTime
     #Find Cost and Depth of any given QC
     cost, depth = ComplexityFinder(qc)
     # print(cost, depth)
+    t0 = time.time()
     dfFull = pd.DataFrame(pd.read_csv(r"Data//NairobiDataFull3.csv"))
+    t1 = time.time()
+    #To Understand how much faster my method is than to generate
+    #all the data on the spot
+    readTime = t1-t0
 
     for i in range(len(dfFull)):
         refCost = dfFull.loc[i, "cost"]
@@ -121,11 +169,13 @@ def selector(qc):
 
     return best
 
-qc = QuantumCircuit(10)
+
+#Delete when making into package
+qc = QuantumCircuit(7)
 qc.x(0)
 qc.cx(1, 0)
 qc.z(2)
-qc.cx(4, 9)
+qc.cx(4, 2)
 qc.cx(2, 6)
 qc.h(0)
 qc.swap(3, 2)
@@ -133,24 +183,64 @@ qc.y(1)
 qc.cx(0, 4)
 qc.x(5)
 qc.y(1)
-qc.h(8)
-qc.swap(7, 3)
+qc.h(6)
+qc.swap(5, 3)
 qc.y(1)
 qc.h(3)
 qc.x(5)
 qc.y(1)
-qc.swap(9, 5)
+qc.swap(1, 5)
 qc.swap(2, 4)
 qc.x(0)
-qc.cx(8, 3)
+qc.cx(6, 3)
 qc.h(5)
 qc.x(6)
-qc.cx(1, 7)
+qc.cx(1, 4)
 qc.y(5)
 
-print(qc)
-t0 = time.time()
-selector(qc)
-t1 = time.time()
-print("Time: ", t1-t0)
-tqc = 
+
+oLevel = selector(qc)
+print("Chosen opt level: ", oLevel)
+
+
+# TEST CODE
+realTimes = []
+time0 = time.time()
+
+start_time = time.time()
+tqc =  transpile(qc, backend, optimization_level = 0)
+t0 = time.time() - start_time
+df = QCtoDF(tqc)
+result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+t1 = result.time_taken
+realTimes.append(t1+t0)
+
+start_time = time.time()
+tqc =  transpile(qc, backend, optimization_level = 1)
+t0 = time.time() - start_time
+df = QCtoDF(tqc)
+result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+t1 = result.time_taken
+realTimes.append(t1+t0)
+
+start_time = time.time()
+tqc =  transpile(qc, backend, optimization_level = 2)
+t0 = time.time() - start_time
+df = QCtoDF(tqc)
+result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+t1 = result.time_taken
+realTimes.append(t1+t0)
+
+start_time = time.time()
+tqc =  transpile(qc, backend, optimization_level = 3)
+t0 = time.time() - start_time
+df = QCtoDF(tqc)
+result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+t1 = result.time_taken
+realTimes.append(t1+t0)
+
+time1 = time.time()
+generateTime = time1-time0
+print("Actual Times: ", realTimes)
+
+print("Read Method is faster by: ", (abs(readTime - generateTime)/((readTime + generateTime)/2))*100)
