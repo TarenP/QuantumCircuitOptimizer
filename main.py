@@ -10,8 +10,7 @@ import random
 import pathlib
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import time
 
 
 Gates = ['x', 'y', 'z', 'h', 'cx', 'swap']
@@ -89,42 +88,69 @@ def ComplexityFinder(qc):
         
     return cost, depth
 
-qc = QuantumCircuit(2)
+def selector(qc):
+    #Find Cost and Depth of any given QC
+    cost, depth = ComplexityFinder(qc)
+    # print(cost, depth)
+    dfFull = pd.DataFrame(pd.read_csv(r"Data//NairobiDataFull3.csv"))
+
+    for i in range(len(dfFull)):
+        refCost = dfFull.loc[i, "cost"]
+        refDepth = dfFull.loc[i, "depth"]
+        if refCost == cost and refDepth == depth:
+            set = i
+            break
+
+    df = pd.read_csv(r"Data//NairobiDataFull3.csv", skiprows = set, nrows=1)
+    df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Counts', 'tqc3Depth', 'tqc3Qubits', 'tqc2TT', 'tqc2RT', 'tqc2Counts', 'tqc2Depth', 'tqc2Qubits', 'tqc1TT', 'tqc1RT', 'tqc1Counts', 'tqc1Depth', 'tqc1Qubits', 'tqc0TT', 'tqc0RT', 'tqc0Counts', 'tqc0Depth', 'tqc0Qubits', 'sim']
+
+    #Get average of runtime and transpile time for each optimization level
+    tqc3AVG = (float(df["tqc3TT"]) + float(df["tqc3RT"]))/2
+    tqc2AVG = (float(df["tqc2TT"]) + float(df["tqc2RT"]))/2
+    tqc1AVG = (float(df["tqc1TT"]) + float(df["tqc1RT"]))/2
+    tqc0AVG = (float(df["tqc0TT"]) + float(df["tqc0RT"]))/2
+    averages = [tqc0AVG, tqc1AVG, tqc2AVG, tqc3AVG]
+    best = averages.index(min(tqc3AVG, tqc2AVG, tqc1AVG, tqc0AVG))
+    print(averages)
+
+    for i in range(len(averages)):
+        if i != best:
+            #check if any of the other numbers are within 5% of the best and the depth transpiled circuit is smaller
+            if abs( (averages[best] - averages[i]) / float(averages[best]) )*100 <= 5 and int(df["tqc" + str(i) + "Depth"]) < int(df["tqc" + str(best) + "Depth"]):
+                best = i
+
+    return best
+
+qc = QuantumCircuit(10)
 qc.x(0)
 qc.cx(1, 0)
-qc.z(0)
+qc.z(2)
+qc.cx(4, 9)
+qc.cx(2, 6)
 qc.h(0)
-qc.x(0)
+qc.swap(3, 2)
 qc.y(1)
+qc.cx(0, 4)
+qc.x(5)
+qc.y(1)
+qc.h(8)
+qc.swap(7, 3)
+qc.y(1)
+qc.h(3)
+qc.x(5)
+qc.y(1)
+qc.swap(9, 5)
+qc.swap(2, 4)
+qc.x(0)
+qc.cx(8, 3)
+qc.h(5)
+qc.x(6)
+qc.cx(1, 7)
+qc.y(5)
 
-#Find Cost and Depth of any given QC
-cost, depth = ComplexityFinder(qc)
-# print(cost, depth)
-dfFull = pd.DataFrame(pd.read_csv(r"Data//NairobiDataFull3.csv"))
-
-for i in range(len(dfFull)):
-    refCost = dfFull.loc[i, "cost"]
-    refDepth = dfFull.loc[i, "depth"]
-    if refCost == cost and refDepth == depth:
-        set = i
-        break
-
-df = pd.read_csv(r"Data//NairobiDataFull3.csv", skiprows = set, nrows=1)
-df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Counts', 'tqc3Depth', 'tqc3Qubits', 'tqc2TT', 'tqc2RT', 'tqc2Counts', 'tqc2Depth', 'tqc2Qubits', 'tqc1TT', 'tqc1RT', 'tqc1Counts', 'tqc1Depth', 'tqc1Qubits', 'tqc0TT', 'tqc0RT', 'tqc0Counts', 'tqc0Depth', 'tqc0Qubits', 'sim']
-
-#Get average of runtime and transpile time for each optimization level
-tqc3AVG = (float(df["tqc3TT"]) + float(df["tqc3RT"]))/2
-tqc2AVG = (float(df["tqc2TT"]) + float(df["tqc2RT"]))/2
-tqc1AVG = (float(df["tqc1TT"]) + float(df["tqc1RT"]))/2
-tqc0AVG = (float(df["tqc0TT"]) + float(df["tqc0RT"]))/2
-averages = [tqc0AVG, tqc1AVG, tqc2AVG, tqc3AVG]
-best = averages.index(min(tqc3AVG, tqc2AVG, tqc1AVG, tqc0AVG))
-print(averages)
-
-for i in range(len(averages)):
-    if i != best:
-        #check if any of the other numbers are within 5% of the best and the depth transpiled circuit is smaller
-        if abs( (averages[best] - averages[i]) / float(averages[best]) )*100 <= 5 and int(df["tqc" + str(i) + "Depth"]) < int(df["tqc" + str(best) + "Depth"]):
-            best = i
-
-print(best)
+print(qc)
+t0 = time.time()
+selector(qc)
+t1 = time.time()
+print("Time: ", t1-t0)
+tqc = 
