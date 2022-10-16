@@ -1,42 +1,16 @@
 from qiskit import *
 import pandas as pd
 from qiskit import transpile
-import random
 import csv
-import numpy as np
 import time
-import itertools
-import random
-import pathlib
 import numpy as np
 import pandas as pd
 import time
-
-
-#Redundant delete later
-#-------------------------------------------------------------
-
-from qiskit import *
-import pandas as pd
-from qiskit import transpile
-import random
-import csv
-import numpy as np
-from qiskit.providers.aer import AerSimulator
-import time
-import itertools
-import random
-import progressbar
-import pathlib
-from IPython.display import clear_output
-from qiskit.tools.monitor import job_monitor
-
+IBMQ.load_account()
+provider = IBMQ.get_provider('ibm-q')
+backend = provider.get_backend('ibmq_manila')
 from qiskit import IBMQ, Aer
 from qiskit.providers.aer.noise import NoiseModel
-provider = IBMQ.load_account()
-# IBMQ.load_account()
-# provider = IBMQ.get_provider('ibm-q')
-backend = provider.get_backend('ibm_nairobi')
 
 qubitCount = 7
 runs = 3
@@ -51,9 +25,7 @@ basis_gates = noise_model.basis_gates
 
 readTime = 0
 
-#-----------------------------------------------------------
-
-dataFile = "Data//NairobiDataFull3.csv"
+dataFile = "Data//NairobiDataAVG1.csv"
 Gates = ['x', 'y', 'z', 'h', 'cx', 'swap']
 gateCosts = [1, 1, 1, 2, 5, 11]
 
@@ -150,8 +122,9 @@ def selector(qc):
             break
 
     df = pd.read_csv(dataFile, skiprows = set, nrows=1)
-    df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Counts', 'tqc3Depth', 'tqc3Qubits', 'tqc2TT', 'tqc2RT', 'tqc2Counts', 'tqc2Depth', 'tqc2Qubits', 'tqc1TT', 'tqc1RT', 'tqc1Counts', 'tqc1Depth', 'tqc1Qubits', 'tqc0TT', 'tqc0RT', 'tqc0Counts', 'tqc0Depth', 'tqc0Qubits', 'sim']
-
+    # df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Counts', 'tqc3Depth', 'tqc3Qubits', 'tqc2TT', 'tqc2RT', 'tqc2Counts', 'tqc2Depth', 'tqc2Qubits', 'tqc1TT', 'tqc1RT', 'tqc1Counts', 'tqc1Depth', 'tqc1Qubits', 'tqc0TT', 'tqc0RT', 'tqc0Counts', 'tqc0Depth', 'tqc0Qubits', 'sim']
+    #For AVG df
+    df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Depth', 'tqc2TT', 'tqc2RT', 'tqc2Depth', 'tqc1TT', 'tqc1RT', 'tqc1Depth', 'tqc0TT', 'tqc0RT', 'tqc0Depth']
     #Get average of runtime and transpile time for each optimization level
     tqc3AVG = (float(df["tqc3TT"]) + float(df["tqc3RT"]))/2
     tqc2AVG = (float(df["tqc2TT"]) + float(df["tqc2RT"]))/2
@@ -175,20 +148,16 @@ def selector(qc):
 
 
 #Delete when making into package
-qc = QuantumCircuit(6)
+qc = QuantumCircuit(5)
 qc.x(0)
-qc.x(5)
+qc.x(0)
+qc.h(4)
 qc.y(1)
-qc.x(0)
-qc.h(5)
-qc.x(2)
-qc.x(5)
-qc.x(0)
-qc.h(5)
-qc.x(5)
+qc.h(0)
+qc.x(4)
+qc.cx(1, 3)
+qc.x(4)
 qc.y(1)
-qc.h(3)
-qc.x(5)
 
 
 
@@ -205,7 +174,9 @@ start_time = time.time()
 tqc =  transpile(qc, backend, optimization_level = 0)
 t0 = time.time() - start_time
 df = QCtoDF(tqc)
-result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+job = execute(tqc, backend=backend)
+job_monitor(job)
+result = job.result()
 depths.append(depthFinder(df))
 t1 = result.time_taken
 realTimes.append(t1+t0)
@@ -214,7 +185,9 @@ start_time = time.time()
 tqc =  transpile(qc, backend, optimization_level = 1)
 t0 = time.time() - start_time
 df = QCtoDF(tqc)
-result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+job = execute(tqc, backend=backend)
+job_monitor(job)
+result = job.result()
 depths.append(depthFinder(df))
 t1 = result.time_taken
 realTimes.append(t1+t0)
@@ -223,7 +196,9 @@ start_time = time.time()
 tqc =  transpile(qc, backend, optimization_level = 2)
 t0 = time.time() - start_time
 df = QCtoDF(tqc)
-result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+job = execute(tqc, backend=backend)
+job_monitor(job)
+result = job.result()
 depths.append(depthFinder(df))
 t1 = result.time_taken
 realTimes.append(t1+t0)
@@ -232,7 +207,9 @@ start_time = time.time()
 tqc =  transpile(qc, backend, optimization_level = 3)
 t0 = time.time() - start_time
 df = QCtoDF(tqc)
-result = execute(tqc, Aer.get_backend('qasm_simulator'), coupling_map=coupling_map, basis_gates=basis_gates, noise_model=noise_model).result()
+job = execute(tqc, backend=backend)
+job_monitor(job)
+result = job.result()
 depths.append(depthFinder(df))
 t1 = result.time_taken
 realTimes.append(t1+t0)
