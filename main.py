@@ -107,8 +107,9 @@ def selector(qc):
     #Find Cost and Depth of any given QC
     cost, depth = ComplexityFinder(qc)
     print(cost, depth)
+
     t0 = time.time()
-    dfFull = pd.DataFrame(pd.read_csv(dataFile))
+    dfFull = pd.read_csv(dataFile)
     t1 = time.time()
     #To Understand how much faster my method is than to generate
     #all the data on the spot
@@ -118,10 +119,10 @@ def selector(qc):
         refCost = dfFull.loc[i, "cost"]
         refDepth = dfFull.loc[i, "depth"]
         if refCost == cost and refDepth == depth:
-            set = i
+            rowSet = i
             break
 
-    df = pd.read_csv(dataFile, skiprows = set, nrows=1)
+    df = pd.read_csv(dataFile, skiprows = rowSet, nrows=1)
     # df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Counts', 'tqc3Depth', 'tqc3Qubits', 'tqc2TT', 'tqc2RT', 'tqc2Counts', 'tqc2Depth', 'tqc2Qubits', 'tqc1TT', 'tqc1RT', 'tqc1Counts', 'tqc1Depth', 'tqc1Qubits', 'tqc0TT', 'tqc0RT', 'tqc0Counts', 'tqc0Depth', 'tqc0Qubits', 'sim']
     #For AVG df
     df.columns = ['cost', 'depth', 'tqc3TT', 'tqc3RT', 'tqc3Depth', 'tqc2TT', 'tqc2RT', 'tqc2Depth', 'tqc1TT', 'tqc1RT', 'tqc1Depth', 'tqc0TT', 'tqc0RT', 'tqc0Depth']
@@ -158,6 +159,7 @@ qc.x(4)
 qc.cx(1, 3)
 qc.x(4)
 qc.y(1)
+qc.h(0)
 
 
 
@@ -165,73 +167,73 @@ oLevel = selector(qc)
 print("Chosen opt level: ", oLevel)
 
 
-# TEST CODE
-realTimes = []
-depths = []
-time0 = time.time()
+# # TEST CODE
+# realTimes = []
+# depths = []
+# time0 = time.time()
 
-start_time = time.time()
-tqc =  transpile(qc, backend, optimization_level = 0)
-t0 = time.time() - start_time
-df = QCtoDF(tqc)
-job = execute(tqc, backend=backend)
-job_monitor(job)
-result = job.result()
-depths.append(depthFinder(df))
-t1 = result.time_taken
-realTimes.append(t1+t0)
+# start_time = time.time()
+# tqc =  transpile(qc, backend, optimization_level = 0)
+# t0 = time.time() - start_time
+# df = QCtoDF(tqc)
+# job = execute(tqc, backend=backend)
+# job_monitor(job)
+# result = job.result()
+# depths.append(depthFinder(df))
+# t1 = result.time_taken
+# realTimes.append(t1+t0)
 
-start_time = time.time()
-tqc =  transpile(qc, backend, optimization_level = 1)
-t0 = time.time() - start_time
-df = QCtoDF(tqc)
-job = execute(tqc, backend=backend)
-job_monitor(job)
-result = job.result()
-depths.append(depthFinder(df))
-t1 = result.time_taken
-realTimes.append(t1+t0)
+# start_time = time.time()
+# tqc =  transpile(qc, backend, optimization_level = 1)
+# t0 = time.time() - start_time
+# df = QCtoDF(tqc)
+# job = execute(tqc, backend=backend)
+# job_monitor(job)
+# result = job.result()
+# depths.append(depthFinder(df))
+# t1 = result.time_taken
+# realTimes.append(t1+t0)
 
-start_time = time.time()
-tqc =  transpile(qc, backend, optimization_level = 2)
-t0 = time.time() - start_time
-df = QCtoDF(tqc)
-job = execute(tqc, backend=backend)
-job_monitor(job)
-result = job.result()
-depths.append(depthFinder(df))
-t1 = result.time_taken
-realTimes.append(t1+t0)
+# start_time = time.time()
+# tqc =  transpile(qc, backend, optimization_level = 2)
+# t0 = time.time() - start_time
+# df = QCtoDF(tqc)
+# job = execute(tqc, backend=backend)
+# job_monitor(job)
+# result = job.result()
+# depths.append(depthFinder(df))
+# t1 = result.time_taken
+# realTimes.append(t1+t0)
 
-start_time = time.time()
-tqc =  transpile(qc, backend, optimization_level = 3)
-t0 = time.time() - start_time
-df = QCtoDF(tqc)
-job = execute(tqc, backend=backend)
-job_monitor(job)
-result = job.result()
-depths.append(depthFinder(df))
-t1 = result.time_taken
-realTimes.append(t1+t0)
+# start_time = time.time()
+# tqc =  transpile(qc, backend, optimization_level = 3)
+# t0 = time.time() - start_time
+# df = QCtoDF(tqc)
+# job = execute(tqc, backend=backend)
+# job_monitor(job)
+# result = job.result()
+# depths.append(depthFinder(df))
+# t1 = result.time_taken
+# realTimes.append(t1+t0)
 
-time1 = time.time()
-generateTime = time1-time0
-print("Actual Times: ", realTimes)
+# time1 = time.time()
+# generateTime = time1-time0
+# print("Actual Times: ", realTimes)
 
-testBest = realTimes.index(min(realTimes))
-print(testBest)
+# testBest = realTimes.index(min(realTimes))
+# print(testBest)
 
-for i in range(len(realTimes)):
-    if i != testBest:
-        print(i)
-        print((abs(realTimes[testBest] - realTimes[i]) / ((float(realTimes[testBest]) + float(realTimes[i]))/2 )*100))
-        print(depths[i], depths[testBest])
-        if (abs(realTimes[testBest] - realTimes[i]) / ((float(realTimes[testBest]) + float(realTimes[i]))/2 )*100) <= 10 and depths[i] < depths[testBest]:
-                print("switched")
-                testBest = i
+# for i in range(len(realTimes)):
+#     if i != testBest:
+#         print(i)
+#         print((abs(realTimes[testBest] - realTimes[i]) / ((float(realTimes[testBest]) + float(realTimes[i]))/2 )*100))
+#         print(depths[i], depths[testBest])
+#         if (abs(realTimes[testBest] - realTimes[i]) / ((float(realTimes[testBest]) + float(realTimes[i]))/2 )*100) <= 10 and depths[i] < depths[testBest]:
+#                 print("switched")
+#                 testBest = i
 
-print("Chosen test opt level: ", testBest)
+# print("Chosen test opt level: ", testBest)
 
 
 
-print("Read Method is faster by: ", (abs(readTime - generateTime)/((readTime + generateTime)/2))*100)
+# print("Read Method is faster by: ", (abs(readTime - generateTime)/((readTime + generateTime)/2))*100)
