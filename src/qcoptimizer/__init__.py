@@ -7,11 +7,12 @@ from qiskit import transpile
 import time
 import pickle
 import pandas as pd
+import csv
 
 Gates = ['rz', 'rx', 'ry', 'sx', 'x', 'y', 'z', 'h', 'cx', 'swap']
 gateCosts = [1, 1, 1, 1, 1, 1, 1, 2, 5, 11]
 
-filename='Data//qcoptimizer//MLModels//PerthSimRegModel.sav'
+filename='src//qcoptimizer//PerthSimRegModel.sav'
 reg =pickle.load(open(filename, 'rb'))
 
 
@@ -35,6 +36,7 @@ def QCtoDF(qc):
             if temp[0] != 'measure' and temp[0] != 'barrier' and temp[0] != 'creg':
                 writer.writerow(temp)
     df = pd.DataFrame(pd.read_csv(r"gatesTemp.csv"))
+    return df
 
 def unique(list1):
   
