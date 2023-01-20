@@ -5,7 +5,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setuptools.setup(
     name = "qcoptimizer",
-    version = "0.0.2.6.2",
+    version = "0.0.2.6.3",
     author = "Taren Patel",
     author_email = "tarenpatel1013@gmail.com",
     description = "A package for quantum circuit complexity-based optimization through Qiskit optimization level assignment",
@@ -18,7 +18,7 @@ setuptools.setup(
     ],
     package_dir = {"": "src"},
     packages = setuptools.find_packages(where="src"),
-    package_data={'': ['src//MLModels//PerthSimRegModel.sav']},
+    package_data={'': ['data/*.sav']},
     include_package_data=True,
     python_requires = ">=3.7"
 )

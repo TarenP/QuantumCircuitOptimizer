@@ -1,0 +1,10 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.py
+src/qcoptimizer/__init__.py
+src/qcoptimizer.egg-info/PKG-INFO
+src/qcoptimizer.egg-info/SOURCES.txt
+src/qcoptimizer.egg-info/dependency_links.txt
+src/qcoptimizer.egg-info/top_level.txt
+src/qcoptimizer/data/PerthSimRegModel.sav
