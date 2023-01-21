@@ -5,7 +5,7 @@ with open("README.md", "r", encoding = "utf-8") as fh:
 
 setuptools.setup(
     name = "qcoptimizer",
-    version = "0.0.2.6.3",
+    version = "0.0.2.7",
     author = "Taren Patel",
     author_email = "tarenpatel1013@gmail.com",
     description = "A package for quantum circuit complexity-based optimization through Qiskit optimization level assignment",
