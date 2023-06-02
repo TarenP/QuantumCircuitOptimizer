@@ -16,8 +16,8 @@ Before running the code, ensure that the following prerequisites are met:
 
 You can install the required libraries using pip
 
-This research paper is built around this package:
-[Quantum Circuit Complexity-Based-Optimization](https://widgets.figshare.com/articles/23256344/embed?show_title=1)
+This function is thoroughly described in this research paper:
+[Quantum Circuit Complexity-Based-Optimization](https://widgets.figshare.com/articles/23256344/embed?show_title=1){:target="_blank"}
 
 #### Github: https://github.com/TarenP/QuantumCircuitOptimizer
 
