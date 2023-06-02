@@ -16,9 +16,6 @@ Before running the code, ensure that the following prerequisites are met:
 
 You can install the required libraries using pip:
 
-```shell
-pip install qiskit pandas
-
 
 #### Github: https://github.com/TarenP/QuantumCircuitOptimizer
 
