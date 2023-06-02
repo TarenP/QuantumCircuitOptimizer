@@ -1,10 +1,6 @@
-## QuantumCircuitOptimizer
-
-#### This package takes any quantum circuit and selects the best Qiskit transpiler optimization level to maximize efficiency and accuracy.
-
 # Quantum Circuit Optimization Selector
 
-The Quantum Circuit Optimization Selector is a Python program that provides a quantum circuit optimization selector based on runtime, gate count, and cost metrics. It uses the Qiskit library for quantum circuit operations and optimization.
+#### This package takes any quantum circuit and selects the best Qiskit transpiler optimization level to maximize efficiency and accuracy.
 
 ## Prerequisites
 
